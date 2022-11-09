@@ -1,0 +1,42 @@
+set(CHIA_ML_HEADER_FILES
+    "include/ComputationGraph.hpp"
+    "include/MLAlgs.hpp"
+    "include/ScalerComputationGraph.hpp"
+    "include/NeuralNetwork/NeuralNetwork.hpp"
+    "include/NeuralNetwork/Layers/ActivationLayer.hpp"
+    "include/NeuralNetwork/Layers/BatchNormLayer.hpp"
+    "include/NeuralNetwork/Layers/LinearLayer.hpp"
+    "include/NeuralNetwork/Layers/LossLayer.hpp"
+    "include/NeuralNetwork/Layers/NeuralLayer.hpp"
+    "include/NeuralNetwork/Layers/NLLLayer.hpp"
+    "include/NeuralNetwork/Layers/ReLULayer.hpp"
+    "include/NeuralNetwork/Layers/SoftMaxLayer.hpp"
+    "include/NeuralNetwork/Layers/TanhLayer.hpp"
+)
+set(CHIA_ML_SOURCE_FILES
+    "src/NeuralNetwork/Layers/ActivationLayer.cpp"
+    "src/NeuralNetwork/Layers/BatchNormLayer.cpp"
+    "src/NeuralNetwork/Layers/LinearLayer.cpp"
+    "src/NeuralNetwork/Layers/LossLayer.cpp"
+    "src/NeuralNetwork/Layers/NeuralLayer.cpp"
+    "src/NeuralNetwork/Layers/NLLLayer.cpp"
+    "src/NeuralNetwork/Layers/ReLULayer.cpp"
+    "src/NeuralNetwork/Layers/SoftMaxLayer.cpp"
+    "src/NeuralNetwork/Layers/TanhLayer.cpp"
+)
+
+add_library(ChiaML STATIC
+    ${CHIA_ML_HEADER_FILES}
+    ${CHIA_ML_SOURCE_FILES}
+)
+target_include_directories(ChiaML PRIVATE
+    "include"
+    "${CMAKE_SOURCE_DIR}/ChiaData/include"
+    "${CMAKE_SOURCE_DIR}/ChiaMath/include"
+    "${CMAKE_SOURCE_DIR}/ChiaRuntime/include"
+)
+target_link_libraries(ChiaML
+    ChiaData
+    ChiaMath
+    ChiaRuntime
+)
