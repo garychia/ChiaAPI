@@ -271,16 +271,16 @@ template <class T> class StrStream
         return *this;
     }
 
-    template <class InputType> StrStream &operator<<(const InputType &input) noexcept
+    template <class InputType> StrStream &operator<<(InputType &&input) noexcept
     {
         if constexpr (Types::IsChar<InputType>::Value)
-            strs.Append(Str<T>(input));
+            strs.Append(Str<T>(Types::Forward<InputType>(input)));
         else if constexpr (Types::IsInteger<InputType>::Value)
-            strs.Append(Str<T>::FromInt(input));
+            strs.Append(Str<T>::FromInt(Types::Forward<InputType>(input)));
         else if constexpr (Types::IsFloat<InputType>::Value)
-            strs.Append(Str<T>::FromFloat(input));
+            strs.Append(Str<T>::FromFloat(Types::Forward<InputType>(input)));
         else
-            strs.Append(input);
+            strs.Append(Types::Forward<InputType>(input));
         return *this;
     }
 

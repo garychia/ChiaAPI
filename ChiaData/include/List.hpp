@@ -14,12 +14,8 @@ template <class T> class List
         Element *prev;
 
         template <class DataType>
-        Element(DataType &&data, List<T> *owner, Element *prev = 0, Element *next = 0)
-            : data(Types::Forward<decltype(data)>(data)), owner(owner), next(next), prev(prev)
-        {
-        }
-
-        Element(const Element &e) : data(e.data), owner(e.owner), next(e.next), prev(e.prev)
+        Element(DataType &&data, List<T> *owner, Element *prev = nullptr, Element *next = nullptr)
+            : data(Types::Forward<T>(data)), owner(owner), next(next), prev(prev)
         {
         }
 
@@ -180,11 +176,11 @@ template <class T> class List
     {
         if (IsEmpty())
         {
-            head = tail = new Element(Types::Forward<decltype(e)>(e), this);
+            head = tail = new Element(Types::Forward<T>(e), this);
         }
         else
         {
-            auto newElement = new Element(Types::Forward<decltype(e)>(e), this, tail);
+            auto newElement = new Element(Types::Forward<T>(e), this, tail);
             tail->next = newElement;
             tail = newElement;
         }
