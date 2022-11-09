@@ -3,9 +3,12 @@
 
 namespace ChiaData
 {
+namespace Math
+{
 template <class T> class List;
 template <class T> class Matrix;
 template <class T> class Vector;
+} // namespace Math
 } // namespace ChiaData
 
 namespace ChiaMath
@@ -155,7 +158,7 @@ template <class T> T Sigmoid(const T &x);
  * @param vector the input vector to the softmax function.
  * @return ChiaData::Vector<T> the output of the softmax function given the input vector.
  */
-template <class T> ChiaData::Vector<T> Softmax(const ChiaData::Vector<T> &vector);
+template <class T> ChiaData::Math::Vector<T> Softmax(const ChiaData::Math::Vector<T> &vector);
 
 /**
  * @brief Softmax Function
@@ -164,7 +167,7 @@ template <class T> ChiaData::Vector<T> Softmax(const ChiaData::Vector<T> &vector
  * @param matrix the input matrix to the softmax function.
  * @return ChiaData::Matrix<T> the output matrix with each of its column applied to by the softmax function.
  */
-template <class T> ChiaData::Matrix<T> Softmax(const ChiaData::Matrix<T> &matrix);
+template <class T> ChiaData::Math::Matrix<T> Softmax(const ChiaData::Math::Matrix<T> &matrix);
 
 /**
  * @brief Gaussian Probability Density Function
@@ -397,14 +400,14 @@ template <class T> T Sigmoid(const T &x)
     return 1 / (1 + Exp(-x));
 }
 
-template <class T> ChiaData::Vector<T> Softmax(const ChiaData::Vector<T> &vector)
+template <class T> ChiaData::Math::Vector<T> Softmax(const ChiaData::Math::Vector<T> &vector)
 {
     const T denomerator = Exp(vector).Sum();
     const ChiaData::Vector<T> numerator = Exp(vector);
     return numerator / denomerator;
 }
 
-template <class T> ChiaData::Matrix<T> Softmax(const ChiaData::Matrix<T> &matrix)
+template <class T> ChiaData::Math::Matrix<T> Softmax(const ChiaData::Math::Matrix<T> &matrix)
 {
     const auto exponents = Exp(matrix);
     const auto summation = exponents.Sum();

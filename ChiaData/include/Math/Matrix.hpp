@@ -74,7 +74,7 @@ template <class T> class Matrix : Container<T>
         // index of row
         size_t row;
 
-        ConstRow(Matrix *pMatrix, size_t row) : pMatrix(pMatrix), row(row)
+        ConstRow(const Matrix *pMatrix, size_t row) : pMatrix(pMatrix), row(row)
         {
         }
 
@@ -247,6 +247,15 @@ template <class T> class Matrix : Container<T>
 
     /**
      * @brief Construct a new Matrix object
+     * 
+     * @param other a matrix to be copied into this matrix.
+     */
+    Matrix(const Matrix<T> &other) : Container<T>(other), nRows(other.nRows), nColumns(other.nColumns)
+    {
+    }
+
+    /**
+     * @brief Construct a new Matrix object
      *
      * @tparam U the type of elements of the other matrix.
      * @param other a matrix that will be copied to this matrix.
@@ -265,6 +274,22 @@ template <class T> class Matrix : Container<T>
     {
         other.nRows = 0;
         other.nColumns = 0;
+    }
+
+    /**
+     * @brief Matrix Copy Assignment
+     * 
+     * @param other a matrix to be copied into this matrix.
+     * @return Matrix<T>& this matrix.
+     */
+    Matrix<T> &operator=(const Matrix<T> &other)
+    {
+        if (this == &other)
+            return *this;
+        Container<T>::operator=(other);
+        nRows = other.nRows;
+        nColumns = other.nColumns;
+        return *this;
     }
 
     /**
@@ -330,8 +355,9 @@ template <class T> class Matrix : Container<T>
      */
     virtual ConstRow operator[](size_t index) const
     {
+        ConstRow row(this, index);
         if (index < nRows)
-            return ConstRow(this, index);
+            return row;
         StringStream stream;
         stream << "Matrix - Index Out of Bound:\n";
         stream << "Matrix::operator[]: the row index is expected to be less than the number of rows.\n";
@@ -457,8 +483,8 @@ template <class T> class Matrix : Container<T>
             stream << "Matrix - Invalid Argument\n";
             stream << "Matrix::Add: the numbers of rows and columns in the argument are expected to be a factor of "
                       "these of rows and columns respectively in this matrix.\n";
-            stream << "Shape of this matrix: " << thisShape << "\n";
-            stream << "Shape of the argument: " << otherShape << "\n";
+            stream << "Shape of this matrix: " << thisShape.ToString() << "\n";
+            stream << "Shape of the argument: " << otherShape.ToString() << "\n";
             throw ChiaRuntime::InvalidArgument(stream.ToString());
         }
         size_t i, j;
@@ -508,8 +534,8 @@ template <class T> class Matrix : Container<T>
             stream
                 << "Matrix::operator+=: the numbers of rows and columns in the argument are expected to be a factor of "
                    "these of rows and columns respectively in this matrix.\n";
-            stream << "Shape of this matrix: " << thisShape << "\n";
-            stream << "Shape of the argument: " << otherShape << "\n";
+            stream << "Shape of this matrix: " << thisShape.ToString() << "\n";
+            stream << "Shape of the argument: " << otherShape.ToString() << "\n";
             throw ChiaRuntime::InvalidArgument(stream.ToString());
         }
         size_t i, j;
@@ -547,8 +573,8 @@ template <class T> class Matrix : Container<T>
             stream
                 << "Matrix::Subtract: the numbers of rows and columns in the argument are expected to be a factor of "
                    "these of rows and columns respectively in this matrix.\n";
-            stream << "Shape of this matrix: " << thisShape << "\n";
-            stream << "Shape of the argument: " << otherShape << "\n";
+            stream << "Shape of this matrix: " << thisShape.ToString() << "\n";
+            stream << "Shape of the argument: " << otherShape.ToString() << "\n";
             throw ChiaRuntime::InvalidArgument(stream.ToString());
         }
 
@@ -599,8 +625,8 @@ template <class T> class Matrix : Container<T>
             stream
                 << "Matrix::operator-=: the numbers of rows and columns in the argument are expected to be a factor of "
                    "these of rows and columns respectively in this matrix.\n";
-            stream << "Shape of this matrix: " << thisShape << "\n";
-            stream << "Shape of the argument: " << otherShape << "\n";
+            stream << "Shape of this matrix: " << thisShape.ToString() << "\n";
+            stream << "Shape of the argument: " << otherShape.ToString() << "\n";
             throw ChiaRuntime::InvalidArgument(stream.ToString());
         }
         size_t i, j;
@@ -627,19 +653,19 @@ template <class T> class Matrix : Container<T>
      */
     template <class U> auto Multiply(const Matrix<U> &other) const
     {
+        const auto thisShape = Shape();
+        const auto otherShape = other.Shape();
         Matrix<decltype((*this)[0][0] * other[0][0])> result(thisShape[0], otherShape[1]);
         if (IsEmpty() || other.IsEmpty())
             return result;
-        const auto thisShape = Shape();
-        const auto otherShape = other.Shape();
         if (thisShape[1] != otherShape[0])
         {
             StringStream stream;
             stream << "Matrix - Invalid Argument\n";
             stream << "Matrix::Multiply: the number of columns of this matrix is expected to be the same as that of "
                       "rows in the argument matrix.\n";
-            stream << "Shape of this matrix: " << thisShape << "\n";
-            stream << "Shape of the argument: " << otherShape << "\n";
+            stream << "Shape of this matrix: " << thisShape.ToString() << "\n";
+            stream << "Shape of the argument: " << otherShape.ToString() << "\n";
             throw ChiaRuntime::InvalidArgument(stream.ToString());
         }
 
@@ -711,8 +737,8 @@ template <class T> class Matrix : Container<T>
             stream << "Matrix - Invalid Argument\n";
             stream << "Matrix::Scale: the numbers of rows and columns in the argument are expected to be a factor of "
                       "these of rows and columns respectively in this matrix.\n";
-            stream << "Shape of this matrix: " << thisShape << "\n";
-            stream << "Shape of the argument: " << otherShape << "\n";
+            stream << "Shape of this matrix: " << thisShape.ToString() << "\n";
+            stream << "Shape of the argument: " << otherShape.ToString() << "\n";
             throw ChiaRuntime::InvalidArgument(stream.ToString());
         }
 
@@ -780,8 +806,8 @@ template <class T> class Matrix : Container<T>
             stream
                 << "Matrix::operator*=: the numbers of rows and columns in the argument are expected to be a factor of "
                    "these of rows and columns respectively in this matrix.\n";
-            stream << "Shape of this matrix: " << thisShape << "\n";
-            stream << "Shape of the argument: " << otherShape << "\n";
+            stream << "Shape of this matrix: " << thisShape.ToString() << "\n";
+            stream << "Shape of the argument: " << otherShape.ToString() << "\n";
             throw ChiaRuntime::InvalidArgument(stream.ToString());
         }
 
@@ -848,8 +874,8 @@ template <class T> class Matrix : Container<T>
             stream << "Matrix - Invalid Argument\n";
             stream << "Matrix::Divide: the numbers of rows and columns in the argument are expected to be a factor of "
                       "these of rows and columns respectively in this matrix.\n";
-            stream << "Shape of this matrix: " << thisShape << "\n";
-            stream << "Shape of the argument: " << otherShape << "\n";
+            stream << "Shape of this matrix: " << thisShape.ToString() << "\n";
+            stream << "Shape of the argument: " << otherShape.ToString() << "\n";
             throw ChiaRuntime::InvalidArgument(stream.ToString());
         }
 
@@ -943,8 +969,8 @@ template <class T> class Matrix : Container<T>
             stream << "Matrix - Invalid Argument\n";
             stream << "Matrix::Scale: the numbers of rows and columns in the argument are expected to be a factor of "
                       "these of rows and columns respectively in this matrix.\n";
-            stream << "Shape of this matrix: " << thisShape << "\n";
-            stream << "Shape of the argument: " << otherShape << "\n";
+            stream << "Shape of this matrix: " << thisShape.ToString() << "\n";
+            stream << "Shape of the argument: " << otherShape.ToString() << "\n";
             throw ChiaRuntime::InvalidArgument(stream.ToString());
         }
 
@@ -1034,7 +1060,7 @@ template <class T> class Matrix : Container<T>
                        << "\n";
         }
         stream << "]";
-        return stream.str();
+        return stream.ToString();
     }
 
     /**
@@ -1134,7 +1160,12 @@ template <class T> class Matrix : Container<T>
      */
     T SumAll() const
     {
-        return elements.Sum();
+        T result = 0;
+        size_t i;
+#pragma omp parallel for schedule(dynamic) reduction(+ : sum)
+        for (i = 0; i < Size(); i++)
+            result += GetElement(i);
+        return result;
     }
 
     /**

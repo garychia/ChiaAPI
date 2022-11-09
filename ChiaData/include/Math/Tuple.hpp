@@ -62,11 +62,6 @@ template <class T> class Tuple : public Container<T>
     }
 
     /**
-     * Copy Constructor with a Container whose elements are of a different type.
-     * @param other a Container whose elements the Tuple will copy.
-     **/
-
-    /**
      * @brief Construct a new Tuple object
      *
      * @tparam U the type of elements in the container.

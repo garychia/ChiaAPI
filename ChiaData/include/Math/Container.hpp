@@ -102,6 +102,21 @@ template <class T> class Container
 
     /**
      * @brief Construct a new Container object
+     * 
+     * @param other a container to be copied to this container.
+     */
+    Container(const Container<T> &other) : Container(other.Size(), 0)
+    {
+        if (!size)
+            return;
+        data = new T[size];
+#pragma omp parallel for schedule(dynamic)
+        for (size_t i = 0; i < size; i++)
+            data[i] = other.data[i];
+    }
+
+    /**
+     * @brief Construct a new Container object
      *
      * @tparam U the type of the elements of the other container.
      * @param other another container to be copied to this container.
@@ -113,7 +128,7 @@ template <class T> class Container
         data = new T[size];
 #pragma omp parallel for schedule(dynamic)
         for (size_t i = 0; i < size; i++)
-            data[i] = other[i];
+            data[i] = other.data[i];
     }
 
     /**
@@ -138,6 +153,31 @@ template <class T> class Container
 
     /**
      * @brief Container Copy Assignment
+     * 
+     * @param other a container to be copied to this container.
+     * @return Container<T>& this container.
+     */
+    Container<T> &operator=(const Container<T> &other)
+    {
+        if (this == &other)
+            return *this;
+
+        size = other.Size();
+        if (data)
+            delete[] data;
+        data = nullptr;
+        if (size > 0)
+        {
+            data = new T[size];
+#pragma omp parallel for schedule(dynamic)
+            for (size_t i = 0; i < size; i++)
+                data[i] = other.data[i];
+        }
+        return *this;
+    }
+
+    /**
+     * @brief Container Copy Assignment
      *
      * @tparam U the type of elements of the other container.
      * @param other a container to be copied to this container.
@@ -157,7 +197,7 @@ template <class T> class Container
             data = new T[size];
 #pragma omp parallel for schedule(dynamic)
             for (size_t i = 0; i < size; i++)
-                data[i] = T(other[i]);
+                data[i] = T(other.data[i]);
         }
         return *this;
     }
