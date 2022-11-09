@@ -21,7 +21,7 @@ add_library(ChiaRuntime STATIC
 
 if (CHIA_CUDA_ENABLED)
     find_package(CUDAToolkit)
-    target_link_libraries(ChiaRuntime PRIVATE CUDA::cudart)
+    target_link_libraries(ChiaRuntime CUDA::cudart)
     set_target_properties(ChiaRuntime PROPERTIES
         LANGUAGE CUDA
         CUDA_SEPARABLE_COMPILATION ON
