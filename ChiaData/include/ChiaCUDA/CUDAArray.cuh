@@ -39,7 +39,7 @@ template <class T> class CUDAArray
      * @param size the initial size of the CUDAArray to be generated.
      * @param value the value the CUDAArray will be filled with.
      **/
-    CUDAArray(size_t size, const T &value) : deviceArr(nullptr), size(size)
+    CUDAArray(size_t size, const T value = 0) : deviceArr(nullptr), size(size)
     {
         if (!size)
             return;
