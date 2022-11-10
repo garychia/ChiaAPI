@@ -22,7 +22,7 @@ bool CheckCUDASuccessful(const cudaError_t &error);
  * @param error the result returned by a CUDA function.
  * @param newline a bool indicates whether a new-line character will be printed after the message.
  */
-void PrintCUDAErrorMessage(const cudaError_t &error, bool newline = false);
+void PrintCUDAErrorMessage(const cudaError_t &error, bool newline = true);
 
 } // namespace ChiaCUDA
 } // namespace ChiaRuntime

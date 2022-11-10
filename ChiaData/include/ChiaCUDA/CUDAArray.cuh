@@ -1,22 +1,27 @@
 #ifndef CUDAARRAY_HPP
 #define CUDAARRAY_HPP
 
-#include "CUDAHelpers.hpp"
-#include "CUDAUtilities.cuh"
-#include "Container.hpp"
+#include "ChiaCUDA/ArrayUtilities.cuh"
+#include "ChiaCUDA/CUDAUtilities.cuh"
 
-#include "cuda_runtime.h"
+#include <cuda_runtime.h>
+
+using namespace ChiaRuntime::ChiaCUDA;
 
 namespace ChiaData
 {
 namespace ChiaCUDA
 {
-
+/**
+ * @brief CUDAArray represents an array on the CUDA device side
+ *
+ * @tparam T the type of the elements in the CUDAArray.
+ */
 template <class T> class CUDAArray
 {
   private:
     // Data stored on the GPU side.
-    T *gpuData = nullptr;
+    T *deviceArr = nullptr;
     // Number of elements stored.
     size_t size = 0;
 
@@ -24,58 +29,62 @@ template <class T> class CUDAArray
     /**
      * @brief Construct a new CUDAArray object
      */
-    CUDAArray() : gpuData(nullptr), size(0)
+    CUDAArray() : deviceArr(nullptr), size(0)
     {
     }
 
     /**
-     * Construct a new CUDAArray object of an initial size and populated
-     * with a value.
+     * @brief Construct a new CUDAArray object
      *
      * @param size the initial size of the CUDAArray to be generated.
      * @param value the value the CUDAArray will be filled with.
      **/
-    CUDAArray(size_t size, const T &value)
+    CUDAArray(size_t size, const T &value) : deviceArr(nullptr), size(size)
     {
-        this->size = size;
-        CheckCUDAStatus(cudaMalloc(&gpuData, size * sizeof(T)));
-        CudaHelpers::GPUArrayPopulate(gpuData, size, value);
+        if (!size)
+            return;
+        PrintCUDAErrorMessage(cudaMalloc(&deviceArr, size * sizeof(T)));
+        const size_t nThreads = 32;
+        const size_t nBlocks = (size + nThreads - 1) / nThreads;
+        ChiaAlgs::ChiaCUDA::PopulateArray<<<nBlocks, nThreads>>>(deviceArr, size, value);
     }
 
     /**
-     * @brief Construct a new CUDAArray object populated with the elements of a
-     * given array.
+     * @brief Construct a new CUDAArray object
      *
      * @param size the size of the CUDAArray.
-     * @param arr the
+     * @param arr the host array whose elements will be copied to this CUDAArray.
      */
-    CUDAArray(size_t size, const T *arr)
+    CUDAArray(size_t size, const T *arr) : deviceArr(nullptr), size(size)
     {
-        this->size = size;
-        CheckCUDAStatus(cudaMalloc(&gpuData, size * sizeof(T)));
-        CheckCUDAStatus(cudaMemcpy(gpuData, arr, sizeof(T) * size, cudaMemcpyHostToDevice));
+        if (!size)
+            return;
+        PrintCUDAErrorMessage(cudaMalloc(&deviceArr, size * sizeof(T)));
+        PrintCUDAErrorMessage(cudaMemcpy(deviceArr, arr, sizeof(T) * size, cudaMemcpyHostToDevice));
     }
 
     /**
-     * @brief Construct a new CUDAArray object copied from another CUDAArray.
+     * @brief Construct a new CUDAArray object
      *
      * @param other a CUDAArray to be copied.
      */
-    CUDAArray(const CUDAArray<T> &other) : size(other.size)
+    CUDAArray(const CUDAArray<T> &other) : deviceArr(nullptr), size(other.size)
     {
-        CheckCUDAStatus(cudaMalloc(&gpuData, size * sizeof(T)));
-        CheckCUDAStatus(cudaMemcpy(gpuData, other.gpuData, sizeof(T) * size, cudaMemcpyDeviceToDevice));
+        if (!size)
+            return;
+        PrintCUDAErrorMessage(cudaMalloc(&deviceArr, size * sizeof(T)));
+        PrintCUDAErrorMessage(cudaMemcpy(deviceArr, other.deviceArr, sizeof(T) * size, cudaMemcpyDeviceToDevice));
     }
 
     /**
-     * @brief Construct a new CUDAArray object using move semantics.
+     * @brief Construct a new CUDAArray object
      *
-     * @param other a r-value reference to a CUDAArray.
+     * @param other a CUDAArray to be 'moved' into this CUDAArray.
      */
-    CUDAArray(CUDAArray<T> &&other) noexcept : size(other.size), gpuData(other.gpuData)
+    CUDAArray(CUDAArray<T> &&other) noexcept : deviceArr(other.deviceArr), size(other.size)
     {
         other.size = 0;
-        other.gpuData = nullptr;
+        other.deviceArr = nullptr;
     }
 
     /**
@@ -83,47 +92,46 @@ template <class T> class CUDAArray
      */
     virtual ~CUDAArray()
     {
-        if (gpuData)
-            CheckCUDAStatus(cudaFree(gpuData));
-        size = 0;
+        if (deviceArr)
+            PrintCUDAErrorMessage(cudaFree(deviceArr));
     }
 
     /**
-     * @brief Copy a CUDArray by assignment.
+     * @brief CUDAArray Copy Assignment
      *
-     * @param other a CUDAArray to be copied.
-     * @return CUDAArray<T>& a reference to this CUDAArray.
+     * @param other a CUDAArray to be copied to this CUDArray.
+     * @return CUDAArray<T>& this CUDAArray.
      */
     virtual CUDAArray<T> &operator=(const CUDAArray<T> &other)
     {
-        if (gpuData)
-            CheckCUDAStatus(cudaFree(gpuData));
+        if (deviceArr)
+            PrintCUDAErrorMessage(cudaFree(deviceArr));
         size = other.size;
-        CheckCUDAStatus(cudaMalloc(&gpuData, sizeof(T) * size));
-        CheckCUDAStatus(cudaMemcpy(gpuData, other.gpuData, sizeof(T) * size, cudaMemcpyDeviceToDevice));
+        PrintCUDAErrorMessage(cudaMalloc(&deviceArr, sizeof(T) * size));
+        PrintCUDAErrorMessage(cudaMemcpy(deviceArr, other.deviceArr, sizeof(T) * size, cudaMemcpyDeviceToDevice));
         return *this;
     }
 
     /**
-     * @brief Move a CUDAArray.
+     * @brief CUDAArray Move Assignment
      *
-     * @param other a CUDAArray to be moved.
-     * @return CUDAArray<T>& the reference to this CUDArray.
+     * @param other a CUDAArray to be 'moved' into this CUDAArray.
+     * @return CUDAArray<T>& this CUDArray.
      */
     virtual CUDAArray<T> &operator=(CUDAArray<T> &&other)
     {
-        if (gpuData)
-            CheckCUDAStatus(cudaFree(gpuData));
-        gpuData = nullptr;
+        if (deviceArr)
+            PrintCUDAErrorMessage(cudaFree(deviceArr));
+        deviceArr = nullptr;
         size = other.size;
-        gpuData = other.gpuData;
+        deviceArr = other.deviceArr;
         other.size = 0;
-        other.gpuData = nullptr;
+        other.deviceArr = nullptr;
         return *this;
     }
 
     /**
-     * @brief Return the size of a CUDAArray.
+     * @brief Return the size (number of elements) of the CUDAArray
      *
      * @return size_t the number of elements this CUDAArray stores.
      */
@@ -140,63 +148,61 @@ template <class T> class CUDAArray
      */
     virtual bool IsEmpty() const
     {
-        return 0 == size;
+        return !size;
     }
 
     /**
-     * @brief Copy data from the device to the host.
+     * @brief Copy the data of the CUDAArray from the device to the host
      *
-     * @param dest the destination where data will be stored on the host side.
+     * @param dest the destination array on the host side to which the data will be copied.
      */
     void CopyToHost(T *dest) const
     {
-        CheckCUDAStatus(cudaMemcpy(dest, gpuData, sizeof(T) * size, cudaMemcpyDeviceToHost));
+        PrintCUDAErrorMessage(cudaMemcpy(dest, deviceArr, sizeof(T) * size, cudaMemcpyDeviceToHost));
     }
 
     /**
-     * @brief Copy data from the device to the host.
+     * @brief Copy the data of the CUDAArray from the device to the host
      *
-     * @param dest the destination where data will be stored on the host side.
+     * @param dest the destination array on the host side to which the data will be copied.
      * @param nElements the number of elements to be copied.
      */
     void CopyToHost(T *dest, size_t nElements) const
     {
-        CheckCUDAStatus(
-            cudaMemcpy(dest, gpuData, sizeof(T) * (nElements > size ? size : nElements), cudaMemcpyDeviceToHost));
+        PrintCUDAErrorMessage(
+            cudaMemcpy(dest, deviceArr, sizeof(T) * (nElements > size ? size : nElements), cudaMemcpyDeviceToHost));
     }
 
     /**
-     * @brief Copy data from the host to the device.
+     * @brief Copy the data of the CUDAArray from the host to the device
      *
-     * @param pSource the source where data will be copied from the host to the
-     * device.
+     * @param src the source where data will be copied from the host to the device.
      */
-    void CopyFromHost(const T *pSource)
+    void CopyFromHost(const T *src)
     {
-        CheckCUDAStatus(cudaMemcpy(gpuData, pSource, sizeof(T) * size, cudaMemcpyHostToDevice));
+        PrintCUDAErrorMessage(cudaMemcpy(deviceArr, src, sizeof(T) * size, cudaMemcpyHostToDevice));
     }
 
     /**
-     * @brief Copy data from the host to the device.
+     * @brief Copy the data of the CUDAArray from the host to the device
      *
-     * @param pSource the source where data will be copied from the host to the
-     * device.
+     * @param src the source where data will be copied from the host to the device.
      * @param nElements the number of elements to be copied.
      */
-    void CopyFromHost(const T *pSource, size_t nElements)
+    void CopyFromHost(const T *src, size_t nElements)
     {
-        CheckCUDAStatus(
-            cudaMemcpy(gpuData, pSource, sizeof(T) * (nElements > size ? size : nElements), cudaMemcpyHostToDevice));
+        PrintCUDAErrorMessage(
+            cudaMemcpy(deviceArr, src, sizeof(T) * (nElements > size ? size : nElements), cudaMemcpyHostToDevice));
     }
 
     /**
-     * @brief Retrieve the GPU pointer that points to data on the GPU side.
+     * @brief Retrieve the pointer that points to the data of CUDAArray on the device side.
      *
-     * @return T* a pointer to the data on the GPU side.
+     * @return T* a pointer to the data on the device side.
      */
-    T *GetGPUPtr() const
+    T *GetDevicePtr() const
     {
-        return gpuData;
+        return deviceArr;
     }
 };
 } // namespace ChiaCUDA
