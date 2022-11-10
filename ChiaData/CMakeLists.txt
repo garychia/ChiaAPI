@@ -25,6 +25,3 @@ target_include_directories(ChiaData INTERFACE
     "${CMAKE_SOURCE_DIR}/ChiaAlgs/include"
     "${CMAKE_SOURCE_DIR}/ChiaRuntime/include"
 )
-target_link_libraries(ChiaData
-    ChiaRuntime
-)
