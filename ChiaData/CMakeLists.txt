@@ -14,7 +14,7 @@ set(CHIA_DATA_HEADER_FILES
     "include/Math/Tuple.hpp"
     "include/Math/Vector.hpp"
     "include/ChiaCUDA/CUDAArray.cuh"
-    "include/ChiaCUDA/CUDAVector.cuh"
+    "include/ChiaCUDA/Math/CUDAVector.cuh"
 )
 
 add_library(ChiaData INTERFACE
@@ -22,4 +22,9 @@ add_library(ChiaData INTERFACE
 )
 target_include_directories(ChiaData INTERFACE
     "include"
+    "${CMAKE_SOURCE_DIR}/ChiaAlgs/include"
+    "${CMAKE_SOURCE_DIR}/ChiaRuntime/include"
+)
+target_link_libraries(ChiaData
+    ChiaRuntime
 )
