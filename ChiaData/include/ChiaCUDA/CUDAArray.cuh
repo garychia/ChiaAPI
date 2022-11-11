@@ -200,7 +200,17 @@ template <class T> class CUDAArray
      *
      * @return T* a pointer to the data on the device side.
      */
-    T *GetDevicePtr() const
+    T *GetDevicePtr()
+    {
+        return deviceArr;
+    }
+
+    /**
+     * @brief Retrieve the pointer that points to the data of CUDAArray on the device side.
+     *
+     * @return const T* a pointer to the data on the device side.
+     */
+    const T *GetDevicePtr() const
     {
         return deviceArr;
     }

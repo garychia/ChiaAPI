@@ -1,14 +1,15 @@
 #ifndef CUDAVECTOR_HPP
 #define CUDAVECTOR_HPP
 
-#include "ChiaCUDA/CUDAArray.hpp"
+#include "ChiaCUDA/Arithmetic.cuh"
+#include "ChiaCUDA/CUDAArray.cuh"
 #include "Vector.hpp"
 
 namespace ChiaData
 {
-namespace Math
-{
 namespace ChiaCUDA
+{
+namespace Math
 {
 template <class T> class CUDAVector
 {
@@ -16,7 +17,7 @@ template <class T> class CUDAVector
     // Buffer on the device
     CUDAArray<T> deviceBuffer;
     // Buffer on the host
-    Vector<T> hostBuffer;
+    ChiaData::Math::Vector<T> hostBuffer;
     // Indicates whether the host buffer has the latest data from the device
     bool hostBufferUpdated;
 
@@ -52,7 +53,7 @@ template <class T> class CUDAVector
 
     /**
      * @brief Construct a new CUDAVector object
-     * 
+     *
      * @param size the number of elements to be stored in this CUDAVector.
      * @param value the value used to populate this CUDAVector.
      */
@@ -63,7 +64,7 @@ template <class T> class CUDAVector
 
     /**
      * @brief Construct a new CUDAVector object
-     * 
+     *
      * @param lst an initializer_list whose elements will be copied to this CUDAVector.
      */
     CUDAVector(const std::initializer_list<T> &lst) : deviceBuffer(lst.size()), hostBuffer(lst), hostBufferUpdated(true)
@@ -73,7 +74,7 @@ template <class T> class CUDAVector
 
     /**
      * @brief Construct a new CUDAVector object
-     * 
+     *
      * @tparam N the size of the array.
      * @param arr an array whose elements will be copied to this CUDAVector.
      */
@@ -85,7 +86,7 @@ template <class T> class CUDAVector
 
     /**
      * @brief Construct a new CUDAVector object
-     * 
+     *
      * @param v a vector whose elements will be copied to this CUDAVector.
      */
     CUDAVector(const std::vector<T> &v) : deviceBuffer(v.size()), hostBuffer(v), hostBufferUpdated(true)
@@ -95,7 +96,7 @@ template <class T> class CUDAVector
 
     /**
      * @brief Construct a new CUDAVector object
-     * 
+     *
      * @param v a vector whose elements will be copied to this CUDAVector.
      */
     CUDAVector(const Vector<T> &v) : deviceBuffer(v.Size()), hostBuffer(v), hostBufferUpdated(true)
@@ -105,7 +106,7 @@ template <class T> class CUDAVector
 
     /**
      * @brief Construct a new CUDAVector object
-     * 
+     *
      * @param v a vector that will be 'moved' into this CUDAVector.
      */
     CUDAVector(Vector<T> &&v) : deviceBuffer(v.Size()), hostBuffer(std::move(v)), hostBufferUpdated(true)
@@ -115,7 +116,7 @@ template <class T> class CUDAVector
 
     /**
      * @brief Construct a new CUDAVector object
-     * 
+     *
      * @param v a CUDAVector that will be copied into this CUDAVector.
      */
     CUDAVector(const CUDAVector<T> &v) : deviceBuffer(v), hostBuffer(), hostBufferUpdated(false)
@@ -124,7 +125,7 @@ template <class T> class CUDAVector
 
     /**
      * @brief Construct a new CUDAVector object
-     * 
+     *
      * @param v a CUDAVector to be 'moved' into this CUDAVector.
      */
     CUDAVector(CUDAVector<T> &&v) : deviceBuffer(std::move(v)), hostBuffer(), hostBufferUpdated(v.hostBufferUpdated)
@@ -143,7 +144,7 @@ template <class T> class CUDAVector
 
     /**
      * @brief CUDAVector Copy Assignment
-     * 
+     *
      * @param other a CUDAVector to be copied to this CUDAVector.
      * @return Vector<T>& this CUDAVector.
      */
@@ -158,7 +159,7 @@ template <class T> class CUDAVector
 
     /**
      * @brief CUDAVector Move Assignment
-     * 
+     *
      * @param other a CUDAVector to be 'moved' into this CUDAVector.
      * @return Vector<T>& this CUDAVector.
      */
@@ -197,7 +198,7 @@ template <class T> class CUDAVector
 
     /**
      * @brief Get the element at the given index in the CUDAVector
-     * 
+     *
      * @param index an index that is expected to be less than the size.
      * @return T& the element at the index.
      */
@@ -210,7 +211,7 @@ template <class T> class CUDAVector
 
     /**
      * @brief Get the element at the given index in the CUDAVector
-     * 
+     *
      * @param index an index that is expected to be less than the size.
      * @return const T& the element at the index.
      */
@@ -221,7 +222,7 @@ template <class T> class CUDAVector
 
     /**
      * @brief Return the dimension (number of elements) of the CUDAVector
-     * 
+     *
      * @return size_t the dimension.
      */
     size_t Dimension() const
@@ -230,8 +231,18 @@ template <class T> class CUDAVector
     }
 
     /**
+     * @brief Calculate the summation of all the elements in this CUDAVector
+     *
+     * @return T the summation
+     */
+    T Sum() const
+    {
+        return ChiaAlgs::ChiaCUDA::SumDeviceArray(deviceBuffer.GetDevicePtr(), deviceBuffer.Size());
+    }
+
+    /**
      * @brief Calculate the Euclidean norm of the CUDAVector.
-     * 
+     *
      * @tparam ReturnType the type of the output.
      * @return ReturnType the Euclidean norm of this CUDAVector.
      */
@@ -250,9 +261,23 @@ template <class T> class CUDAVector
     {
         return Length<ReturnType>();
     }
+
+    template <class ReturnType> ReturnType LpNorm(size_t p) const
+    {
+        T *squaredArray;
+        ChiaRuntime::ChiaCUDA::PrintCUDAErrorMessage(cudaMalloc(&squaredArray, sizeof(T) * deviceBuffer.Size()));
+        const size_t nThreads = 32;
+        const size_t nBlocks = (deviceBuffer.Size() + nThreads - 1) / nThreads;
+        ChiaAlgs::ChiaCUDA::ArrayMap<<<nBlocks, nThreads>>>(
+            squaredArray, deviceBuffer.GetDevicePtr(), [&p](const T &e) { return ChiaMath::Power(e, p); },
+            deviceBuffer.Size());
+        T result = ChiaAlgs::ChiaCUDA::SumDeviceArray(squaredArray, deviceBuffer.Size());
+        ChiaRuntime::ChiaCUDA::PrintCUDAErrorMessage(cudaFree(squaredArray));
+        return ChiaMath::Power(result, 1 / p);
+    }
 };
-} // namespace ChiaCUDA
 } // namespace Math
+} // namespace ChiaCUDA
 } // namespace ChiaData
 
 #endif
