@@ -3,6 +3,8 @@
 
 #include <cuda_runtime.h>
 
+#include "CUDAUtilities.cuh"
+
 namespace ChiaAlgs
 {
 namespace ChiaCUDA
@@ -95,8 +97,19 @@ template <class OutputType, class ArrayType, class ScalerType, class IndexType>
 __global__ void ArrayScalerDivision(OutputType *dest, const ArrayType *arr, const ScalerType scaler,
                                     const IndexType size);
 
+/**
+ * @brief Map each element in a device array to a new value
+ * 
+ * @tparam T the type of elements in the output array.
+ * @tparam U the type of elements in the input array.
+ * @tparam MapFunction the type of function that maps each element in the input array to a new value.
+ * @param output an array where the mapped elements are stored.
+ * @param input an array where each element is mapped by f.
+ * @param f a mapping function.
+ * @param size the number of elements in the input array.
+ */
 template <class T, class U, class MapFunction>
-__global__ void ArrayMap(T *output, const U *input, MapFunction f, size_t size);
+__global__ void ArrayMap(T *output, const U *input, MapFunction &&f, size_t size);
 
 /**
  * @brief Calculate each element of an array raised to a given power
@@ -111,6 +124,17 @@ __global__ void ArrayMap(T *output, const U *input, MapFunction f, size_t size);
  */
 template <class T, class IndexType, class PowerType>
 __global__ void Power(T *dest, const T *arr, IndexType size, PowerType power);
+
+/**
+ * @brief Calculate the summation of all the elements in an array on the device
+ * 
+ * @tparam T the type of the elements in the array.
+ * @tparam IndexType the type of the index.
+ * @param arr a device array.
+ * @param size the number of elements in the array.
+ * @return T the summation of the elements.
+ */
+template <class T, class IndexType> T SumDeviceArray(const T *arr, IndexType size);
 
 } // namespace ChiaCUDA
 } // namespace ChiaAlgs
@@ -151,7 +175,7 @@ ARRAY_SCALER_FUNCTION_IMPLEMENTATION(ArrayScalerMultiplication, *);
 ARRAY_SCALER_FUNCTION_IMPLEMENTATION(ArrayScalerDivision, /);
 
 template <class T, class U, class MapFunction>
-__global__ void ArrayMap(T *output, const U *input, MapFunction f, size_t size)
+__global__ void ArrayMap(T *output, const U *input, MapFunction &&f, size_t size)
 {
     const size_t i = threadIdx.x + blockIdx.x * blockDim.x;
     if (i < size)
@@ -164,6 +188,36 @@ __global__ void Power(T *dest, const T *arr, IndexType size, PowerType power)
     const IndexType i = threadIdx.x + blockIdx.x * blockDim.x;
     if (i < size)
         dest[i] = ChiaMath::Power<T, PowerType>(arr[i], power);
+}
+
+namespace
+{
+template <class T, class IndexType> __global__ void SumSubArray(T *dest, const T *arr, IndexType size)
+{
+    const IndexType start = threadIdx.x;
+    const IndexType end = ChiaMath::Min(size, start + blockDim.x);
+    for (IndexType i = start; i < end; i++)
+        *dest = arr[i];
+}
+} // namespace
+
+template <class T, class IndexType> T SumDeviceArray(const T *arr, IndexType size)
+{
+    if (0 == size)
+        return 0;
+    const size_t nThreads = 32;
+    if (size <= nThreads)
+    {
+        T *pSum;
+        ChiaRuntime::ChiaCUDA::PrintCUDAErrorMessage(cudaMalloc(&pSum, sizeof(T)));
+        SumSubArray<<<1, nThreads>>>(pSum, arr, size);
+        T result;
+        ChiaRuntime::ChiaCUDA::PrintCUDAErrorMessage(cudaMemcpy(&result, pSum, sizeof(T), cudaMemcpyDeviceToHost));
+        ChiaRuntime::ChiaCUDA::PrintCUDAErrorMessage(cudaFree(pSum));
+        return result;
+    }
+    const auto halfSize = size >> 1;
+    return SumDeviceArray(arr, halfSize) + SumDeviceArray(arr + halfSize, size - halfSize);
 }
 } // namespace ChiaCUDA
 } // namespace ChiaAlgs
