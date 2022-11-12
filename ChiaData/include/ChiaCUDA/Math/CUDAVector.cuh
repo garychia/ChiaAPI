@@ -271,12 +271,25 @@ template <class T> class CUDAVector
         ChiaAlgs::ChiaCUDA::ArrayMap<<<nBlocks, nThreads>>>(
             squaredArray, deviceBuffer.GetDevicePtr(), [&p](const T &e) { return ChiaMath::Power(e, p); },
             deviceBuffer.Size());
+        ChiaRuntime::ChiaCUDA::PrintCUDAErrorMessage(cudaDeviceSynchronize());
         T result = ChiaAlgs::ChiaCUDA::SumDeviceArray(squaredArray, deviceBuffer.Size());
         ChiaRuntime::ChiaCUDA::PrintCUDAErrorMessage(cudaFree(squaredArray));
         return ChiaMath::Power(result, 1 / p);
     }
 
-    template <class U> auto Add(const CUDAVector<U> &other)
+    template <class ScalerType> auto Add(const ScalerType &scaler) const
+    {
+        CUDAVector<(*this)[0] + scaler> result(*this);
+        const size_t nThreads = 32;
+        const size_t nBlocks = (thisDimension + nThreads - 1) / nThreads;
+        result.hostBufferUpdated = false;
+        ChiaAlgs::ChiaCUDA::ArrayScalerAddition<<<nBlocks, nThreads>>>(
+            result.deviceBuffer.GetDevicePtr(), deviceBuffer.GetDevicePtr(), scaler, Dimension());
+        ChiaRuntime::ChiaCUDA::PrintCUDAErrorMessage(cudaDeviceSynchronize());
+        return result;
+    }
+
+    template <class U> auto Add(const CUDAVector<U> &other) const
     {
         CUDAVector<(*this)[0] + other[0]> result(*this);
         if (IsEmpty() || other.IsEmpty())
@@ -299,6 +312,7 @@ template <class T> class CUDAVector
         ChiaAlgs::ChiaCUDA::ArrayAddition<<<nBlocks, nThreads>>>(result.deviceBuffer.GetDevicePtr(),
                                                                  deviceBuffer.GetDevicePtr(),
                                                                  other.deviceBuffer.GetDevicePtr(), otherDimension);
+        ChiaRuntime::ChiaCUDA::PrintCUDAErrorMessage(cudaDeviceSynchronize());
         return result;
     }
 };
