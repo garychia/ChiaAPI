@@ -275,6 +275,32 @@ template <class T> class CUDAVector
         ChiaRuntime::ChiaCUDA::PrintCUDAErrorMessage(cudaFree(squaredArray));
         return ChiaMath::Power(result, 1 / p);
     }
+
+    template <class U> auto Add(const CUDAVector<U> &other)
+    {
+        CUDAVector<(*this)[0] + other[0]> result(*this);
+        if (IsEmpty() || other.IsEmpty())
+            return result;
+        const auto thisDimension = Dimension();
+        const auto otherDimension = other.Dimension();
+        else if (thisDimension % otherDimension != 0)
+        {
+            StringStream stream;
+            stream << "CUDAVector - Invalid Argument:\n";
+            stream << "CUDAVector::Add: the argument is expected to have a dimension that is a factor of that of this "
+                      "CUDAVector.\n";
+            stream << "Dimension of this CUDAVector: " << thisDimension << "\n";
+            stream << "Dimension of the argument: " << otherDimension << "\n";
+            throw ChiaRuntime::InvalidArgument(stream.ToString());
+        }
+        result.hostBufferUpdated = false;
+        const size_t nThreads = 32;
+        const size_t nBlocks = (thisDimension + nThreads - 1) / nThreads;
+        ChiaAlgs::ChiaCUDA::ArrayAddition<<<nBlocks, nThreads>>>(result.deviceBuffer.GetDevicePtr(),
+                                                                 deviceBuffer.GetDevicePtr(),
+                                                                 other.deviceBuffer.GetDevicePtr(), otherDimension);
+        return result;
+    }
 };
 } // namespace Math
 } // namespace ChiaCUDA
