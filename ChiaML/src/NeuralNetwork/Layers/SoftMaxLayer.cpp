@@ -26,7 +26,7 @@ Matrix<double> SoftMaxLayer::Backward(const Matrix<double> &derivative)
     return derivative;
 }
 
-std::string SoftMaxLayer::ToString() const
+std::string SoftMaxLayer::ToStdString() const
 {
     std::stringstream ss;
     ss << "SoftMaxLayer:\n";

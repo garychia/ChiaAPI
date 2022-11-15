@@ -47,7 +47,7 @@ void LinearLayer::UpdateWeights(const double &learningRate)
     biases -= learningRate * dBiases;
 }
 
-std::string LinearLayer::ToString() const
+std::string LinearLayer::ToStdString() const
 {
     std::stringstream ss;
     ss << "LinearLayer: {" << std::endl;

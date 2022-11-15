@@ -25,7 +25,7 @@ Matrix<double> TanhLayer::Backward(const Matrix<double> &derivative)
     return this->output.Map([](const double &e) { return 1 - e * e; }).Scale(derivative);
 }
 
-std::string TanhLayer::ToString() const
+std::string TanhLayer::ToStdString() const
 {
     std::stringstream ss;
     ss << "TanhLayer:" << std::endl;

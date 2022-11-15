@@ -14,6 +14,7 @@ set(CHIA_ML_HEADER_FILES
     "include/NeuralNetwork/Layers/TanhLayer.hpp"
 )
 set(CHIA_ML_SOURCE_FILES
+    "src/NeuralNetwork/NeuralNetwork.cpp"
     "src/NeuralNetwork/Layers/ActivationLayer.cpp"
     "src/NeuralNetwork/Layers/BatchNormLayer.cpp"
     "src/NeuralNetwork/Layers/LinearLayer.cpp"

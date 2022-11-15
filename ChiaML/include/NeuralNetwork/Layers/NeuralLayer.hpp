@@ -49,7 +49,7 @@ class NeuralLayer
      * Generate a string description of this layer.
      * @return a string that describes this layer.
      **/
-    virtual std::string ToString() const = 0;
+    virtual std::string ToStdString() const = 0;
 
     /**
      * Retrieve the lastest input to this layer.

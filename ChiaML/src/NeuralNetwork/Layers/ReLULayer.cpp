@@ -23,7 +23,7 @@ Matrix<double> ReLULayer::Backward(const Matrix<double> &derivative)
     return this->output.Map([](const double &e) { return e > 0 ? 1 : 0; }).Scale(derivative);
 }
 
-std::string ReLULayer::ToString() const
+std::string ReLULayer::ToStdString() const
 {
     std::stringstream ss;
     ss << "ReLULayer:\n";

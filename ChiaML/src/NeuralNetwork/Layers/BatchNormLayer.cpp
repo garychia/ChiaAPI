@@ -54,7 +54,7 @@ void BatchNormLayer::UpdateWeights(const double &learningRate)
     shift -= dShift * learningRate;
 }
 
-std::string BatchNormLayer::ToString() const
+std::string BatchNormLayer::ToStdString() const
 {
     std::stringstream ss;
     ss << "BatchNormLayer: {" << std::endl;

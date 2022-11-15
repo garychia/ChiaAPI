@@ -30,7 +30,7 @@ class SoftMaxLayer : public ActivationLayer
      * Generate a string description of this layer.
      * @return a string that describes this layer.
      **/
-    virtual std::string ToString() const override;
+    virtual std::string ToStdString() const override;
 };
 } // namespace Layers
 } // namespace NN

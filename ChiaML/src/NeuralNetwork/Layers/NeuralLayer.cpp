@@ -22,7 +22,7 @@ Matrix<double> NeuralLayer::GetLastOutput() const
 
 std::ostream &operator<<(std::ostream &stream, const NeuralLayer &layer)
 {
-    stream << layer.ToString();
+    stream << layer.ToStdString();
     return stream;
 }
 } // namespace Layers
