@@ -1,13 +1,18 @@
 #ifndef ML_ALGS_HPP
 #define ML_ALGS_HPP
 
+#ifdef _OPENMP
+#include <omp.h>
+#endif
+
 #include <functional>
 
-#include "List.hpp"
-#include "Matrix.hpp"
-#include "Vector.hpp"
+#include "DynamicArray.hpp"
+#include "Math.hpp"
+#include "Math/Matrix.hpp"
+#include "Math/Vector.hpp"
 
-using namespace ChiaData;
+using namespace ChiaData::Math;
 
 namespace ChiaML
 {
@@ -89,9 +94,19 @@ template <class InputType, class OutputType, class StepType>
 InputType GradientDescent(const std::function<OutputType(const InputType &)> &f,
                           const std::function<InputType(const InputType &)> &df, const InputType &initialX,
                           const std::function<StepType(std::size_t)> &stepFunc, std::size_t iterations,
-                          bool recordHistory = false, List<InputType> *xHistory = nullptr,
-                          List<OutputType> *outputHistory = nullptr);
+                          bool recordHistory = false, ChiaData::DynamicArray<InputType> *xHistory = nullptr,
+                          ChiaData::DynamicArray<OutputType> *outputHistory = nullptr);
 
+/**
+ * @brief Generate a positional encoding matrix
+ *
+ * @tparam FloatType the type of elements of the encoding matrix.
+ * @param length the length of the sequence of words.
+ * @param depth the depth (length) of the encoding.
+ * @return Matrix<FloatType> the positional encoding matrix where the n-th row corresponds to the n-th word in the
+ * sequence.
+ */
+template <class FloatType> Matrix<FloatType> PositionalEncoding(size_t length, size_t depth);
 } // namespace ChiaML
 
 #define MAX(a, b) (a) > (b) ? (a) : (b)
@@ -170,7 +185,8 @@ template <class InputType, class OutputType, class StepType>
 InputType GradientDescent(const std::function<OutputType(const InputType &)> &f,
                           const std::function<InputType(const InputType &)> &df, const InputType &initialX,
                           const std::function<StepType(std::size_t)> &stepFunc, std::size_t iterations,
-                          bool recordHistory, List<InputType> *xHistory, List<OutputType> *outputHistory)
+                          bool recordHistory, ChiaData::DynamicArray<InputType> *xHistory,
+                          ChiaData::DynamicArray<OutputType> *outputHistory)
 {
     InputType x = initialX;
     if (recordHistory && xHistory)
@@ -186,6 +202,24 @@ InputType GradientDescent(const std::function<OutputType(const InputType &)> &f,
             outputHistory->Append(f(x));
     }
     return x;
+}
+
+template <class FloatType> Matrix<FloatType> PositionalEncoding(size_t length, size_t depth)
+{
+    Matrix<FloatType> result(length, depth);
+    size_t position, i;
+#pragma omp parallel for private(i) collapse(2) schedule(dynamic)
+    for (position = 0; position < length; position++)
+    {
+        for (i = 0; i < (depth >> 1); i++)
+        {
+            const auto doubleI = i << 1;
+            const FloatType value = position / ChiaMath::Power(FloatType(10000), FloatType(doubleI) / depth);
+            result[position][doubleI] = ChiaMath::Sine(value);
+            result[position][doubleI + 1] = ChiaMath::Cosine(value);
+        }
+    }
+    return result;
 }
 } // namespace ChiaML
 
