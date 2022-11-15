@@ -30,7 +30,7 @@ add_library(ChiaML STATIC
     ${CHIA_ML_HEADER_FILES}
     ${CHIA_ML_SOURCE_FILES}
 )
-target_include_directories(ChiaML PRIVATE
+target_include_directories(ChiaML PUBLIC
     "include"
     "${CMAKE_SOURCE_DIR}/ChiaData/include"
     "${CMAKE_SOURCE_DIR}/ChiaMath/include"

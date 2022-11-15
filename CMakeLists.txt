@@ -26,3 +26,5 @@ add_subdirectory(ChiaRuntime)
 add_subdirectory(ChiaMath)
 add_subdirectory(ChiaAlgs)
 add_subdirectory(ChiaML)
+
+add_subdirectory(Examples)
