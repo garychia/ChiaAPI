@@ -277,6 +277,11 @@ template <class T> T Sine(const T &x)
         factor = -factor;
         numerator *= squaredInput;
         denominator *= i * (i - 1);
+        if (denominator > 10000)
+        {
+            numerator /= denominator;
+            denominator = 1;
+        }
         i += 2;
         result += factor * numerator / denominator;
     }
@@ -302,6 +307,11 @@ template <class T> T Cosine(const T &x)
         factor = -factor;
         numerator *= squaredInput;
         denominator *= i * (i - 1);
+        if (denominator > 10000)
+        {
+            numerator /= denominator;
+            denominator = 1;
+        }
         i += 2;
         result += factor * numerator / denominator;
     }
