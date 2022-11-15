@@ -45,7 +45,7 @@ template <class T> class Matrix : Container<T>
         {
             Tuple<T> matrixShape = pMatrix->Shape();
             if (index < matrixShape[1])
-                return pMatrix->GetElement(matrixShape[1] * row + index);
+                return pMatrix->GetElement(row, index);
             StringStream stream;
             stream << "Matrix::Row - Index Out of Bound:\n";
             stream << "Number of columns: " << matrixShape[1] << "\n";
@@ -89,7 +89,7 @@ template <class T> class Matrix : Container<T>
         {
             Tuple<T> matrixShape = pMatrix->Shape();
             if (index < matrixShape[1])
-                return pMatrix->GetElement(matrixShape[1] * row + index);
+                return pMatrix->GetElement(row, index);
             StringStream stream;
             stream << "Matrix::ConstRow - Index Out of Bound:\n";
             stream << "Number of columns: " << matrixShape[1] << "\n";
@@ -247,7 +247,7 @@ template <class T> class Matrix : Container<T>
 
     /**
      * @brief Construct a new Matrix object
-     * 
+     *
      * @param other a matrix to be copied into this matrix.
      */
     Matrix(const Matrix<T> &other) : Container<T>(other), nRows(other.nRows), nColumns(other.nColumns)
@@ -278,7 +278,7 @@ template <class T> class Matrix : Container<T>
 
     /**
      * @brief Matrix Copy Assignment
-     * 
+     *
      * @param other a matrix to be copied into this matrix.
      * @return Matrix<T>& this matrix.
      */
@@ -493,8 +493,7 @@ template <class T> class Matrix : Container<T>
         {
             for (j = 0; j < nColumns; j++)
             {
-                result.GetElement(i * nColumns + j) +=
-                    other.GetElement((i % other.nRows) * other.nColumns + (j % other.nColumns));
+                result.GetElement(i, j) += other.GetElement(i % other.nRows, j % other.nColumns);
             }
         }
         return result;
@@ -544,8 +543,7 @@ template <class T> class Matrix : Container<T>
         {
             for (j = 0; j < nColumns; j++)
             {
-                (*this).GetElement(i * nColumns + j) +=
-                    other.GetElement((i % other.nRows) * other.nColumns + (j % other.nColumns));
+                (*this).GetElement(i, j) += other.GetElement(i % other.nRows, j % other.nColumns);
             }
         }
         return *this;
@@ -584,8 +582,7 @@ template <class T> class Matrix : Container<T>
         {
             for (j = 0; j < nColumns; j++)
             {
-                result.GetElement(i * nRows + j) -=
-                    other.GetElement((i % other.nRows) * other.nColumns + (j % other.nColumns));
+                result.GetElement(i, j) -= other.GetElement(i % other.nRows, j % other.nColumns);
             }
         }
         return result;
@@ -635,8 +632,7 @@ template <class T> class Matrix : Container<T>
         {
             for (j = 0; j < nColumns; j++)
             {
-                (*this).GetElement(i * nColumns + j) -=
-                    other.GetElement((i % other.nRows) * other.nColumns + (j % other.nColumns));
+                (*this).GetElement(i, j) -= other.GetElement(i % other.nRows, j % other.nColumns);
             }
         }
         return *this;
@@ -675,8 +671,7 @@ template <class T> class Matrix : Container<T>
             for (k = 0; k < thisShape[1]; k++)
                 for (j = 0; j < otherShape[1]; j++)
 #pragma omp atomic
-                    result.GetElement(i * result.nColumns + j) +=
-                        (*this).GetElement(i * nColumns + k) * other.GetElement(k * other.nColumns + j);
+                    result.GetElement(i, j) += (*this).GetElement(i, k) * other.GetElement(k, j);
         return result;
     }
 
@@ -748,8 +743,7 @@ template <class T> class Matrix : Container<T>
         {
             for (j = 0; j < nColumns; j++)
             {
-                result.GetElement(i * nColumns + j) *=
-                    other.GetElement((i % other.nRows) * other.nColumns + (j % other.nColumns));
+                result.GetElement(i, j) *= other.GetElement(i % other.nRows, j % other.nColumns);
             }
         }
         return result;
@@ -779,7 +773,7 @@ template <class T> class Matrix : Container<T>
         for (i = 0; i < nRows; i++)
         {
             for (j = 0; j < nColumns; j++)
-                (*this).GetElement(i * nColumns + j) *= scaler;
+                (*this).GetElement(i, j) *= scaler;
         }
         return *this;
     }
@@ -816,8 +810,7 @@ template <class T> class Matrix : Container<T>
         for (i = 0; i < nRows; i++)
         {
             for (j = 0; j < nColumns; j++)
-                (*this).GetElement(i * nColumns + j) *=
-                    other.GetElement((i % other.nRows) * other.nColumns + (j % other.nColumns));
+                (*this).GetElement(i, j) *= other.GetElement(i % other.nRows, j % other.nColumns);
         }
         return *this;
     }
@@ -846,7 +839,7 @@ template <class T> class Matrix : Container<T>
         for (i = 0; i < nRows; i++)
         {
             for (j = 0; j < nColumns; j++)
-                result.GetElement(i * nColumns + j) /= scaler;
+                result.GetElement(i, j) /= scaler;
         }
         return result;
     }
@@ -883,14 +876,14 @@ template <class T> class Matrix : Container<T>
         {
             for (size_t j = 0; j < other.nColumns; j++)
             {
-                if (other.GetElement(i * other.nColumns + j) == 0)
+                if (other.GetElement(i, j) == 0)
                 {
                     StringStream stream;
                     stream << "Matrix - Divided by Zero:\n";
                     stream << "Matrix::Divide: all of the elements of the argument are expected to be non-zero.\n";
                     stream << "Row index of the argument (i =): " << i << "\n";
                     stream << "Column index of the argument: (j =)" << j << "\n";
-                    stream << "argument[i][j] = " << other.GetElement(i * other.nColumns + j) << "\n";
+                    stream << "argument[i][j] = " << other.GetElement(i, j) << "\n";
                     throw ChiaRuntime::DividedByZero(stream.ToString());
                 }
             }
@@ -901,8 +894,7 @@ template <class T> class Matrix : Container<T>
         for (i = 0; i < nRows; i++)
         {
             for (j = 0; j < nColumns; j++)
-                result.GetElement(i * nColumns + j) /=
-                    other.GetElement((i % other.nRows) * other.nColumns + (j % other.nColumns));
+                result.GetElement(i, j) /= other.GetElement(i % other.nRows, j % other.nColumns);
         }
         return result;
     }
@@ -942,7 +934,7 @@ template <class T> class Matrix : Container<T>
         for (i = 0; i < nRows; i++)
         {
             for (j = 0; j < nColumns; j++)
-                (*this).GetElement(i * nColumns + j) /= scaler;
+                (*this).GetElement(i, j) /= scaler;
         }
         return *this;
     }
@@ -978,14 +970,14 @@ template <class T> class Matrix : Container<T>
         {
             for (size_t j = 0; j < other.nColumns; j++)
             {
-                if (other.GetElement(i * other.nColumns + j) == 0)
+                if (other.GetElement(i, j) == 0)
                 {
                     StringStream stream;
                     stream << "Matrix - Divided by Zero:\n";
                     stream << "Matrix::Divide: all of the elements of the argument are expected to be non-zero.\n";
                     stream << "Row index of the argument (i =): " << i << "\n";
                     stream << "Column index of the argument: (j =)" << j << "\n";
-                    stream << "argument[i][j] = " << other.GetElement(i * other.nColumns + j) << "\n";
+                    stream << "argument[i][j] = " << other.GetElement(i, j) << "\n";
                     throw ChiaRuntime::DividedByZero(stream.ToString());
                 }
             }
@@ -996,8 +988,7 @@ template <class T> class Matrix : Container<T>
         for (i = 0; i < nRows; i++)
         {
             for (j = 0; j < nColumns; j++)
-                (*this).GetElement(i * nColumns + j) /=
-                    other.GetElement((i % other.nRows) * other.nColumns + (j % other.nColumns));
+                (*this).GetElement(i, j) /= other.GetElement(i % other.nRows, j % other.nColumns);
         }
         return *this;
     }
@@ -1050,7 +1041,7 @@ template <class T> class Matrix : Container<T>
             stream << (i == 0 ? "[" : " [");
             for (size_t j = 0; j < nColumns; j++)
             {
-                stream << (*this).GetElement(i * nColumns + j);
+                stream << (*this).GetElement(i, j);
                 if (j < nColumns - 1)
                     stream << ", ";
             }
@@ -1077,7 +1068,7 @@ template <class T> class Matrix : Container<T>
             ss << (i == 0 ? "[" : " [");
             for (size_t j = 0; j < nColumns; j++)
             {
-                ss << (*this).GetElement(i * nColumns + j);
+                ss << (*this).GetElement(i, j);
                 if (j < nColumns - 1)
                     ss << ", ";
             }
@@ -1103,7 +1094,7 @@ template <class T> class Matrix : Container<T>
         {
             for (j = 0; j < nColumns; j++)
             {
-                newElements[j * nRows + i] = (*this).GetElement(i * nColumns + j);
+                newElements[j * nRows + i] = (*this).GetElement(i, j);
             }
         }
         delete this->data;
@@ -1184,7 +1175,7 @@ template <class T> class Matrix : Container<T>
             for (i = 0; i < nRows; i++)
             {
                 for (j = 0; j < nColumns; j++)
-                    result.GetElement(j) += (*this).GetElement(i * nColumns + j);
+                    result.GetElement(j) += (*this).GetElement(i, j);
             }
         }
         else
@@ -1193,7 +1184,7 @@ template <class T> class Matrix : Container<T>
             for (i = 0; i < nRows; i++)
             {
                 for (j = 0; j < nColumns; j++)
-                    result.GetElement(i * result.nColumns) += (*this).GetElement(i * nColumns + j);
+                    result.GetElement(i, 0) += (*this).GetElement(i, j);
             }
         }
         return result;
@@ -1225,7 +1216,7 @@ template <class T> class Matrix : Container<T>
         for (i = 0; i < result.nRows; i++)
         {
             for (j = 0; j < result.nColumns; j++)
-                result.GetElement(i * result.nColumns + j) = f(result.GetElement(i * result.nColumns + j));
+                result.GetElement(i, j) = f(result.GetElement(i, j));
         }
         return result;
     }
@@ -1241,7 +1232,7 @@ template <class T> class Matrix : Container<T>
         Matrix<T> result(n, n);
 #pragma omp parallel for schedule(dynamic)
         for (size_t i = 0; i < n; i++)
-            result.GetElement(i * result.nColumns + i) = 1;
+            result.GetElement(i, i) = 1;
         return result;
     }
 
@@ -1257,7 +1248,7 @@ template <class T> class Matrix : Container<T>
         auto result = Identity(n, n);
 #pragma omp parallel for schedule(dynamic)
         for (size_t i = 0; i < n; i++)
-            result.GetElement(i * result.nColumns + i) = values[i];
+            result.GetElement(i, i) = values[i];
         return result;
     }
 
@@ -1273,7 +1264,7 @@ template <class T> class Matrix : Container<T>
         auto result = Identity(n);
 #pragma omp parallel for schedule(dynamic)
         for (size_t i = 0; i < n - 1; i++)
-            result.GetElement(i * result.nColumns + n - 1) = deltas[i];
+            result.GetElement(i, n - 1) = deltas[i];
         return result;
     }
 
@@ -1289,7 +1280,7 @@ template <class T> class Matrix : Container<T>
         auto result = Identity(n);
 #pragma omp parallel for schedule(dynamic)
         for (size_t i = 0; i < n - 1; i++)
-            result.GetElement(i * result.nColumns + i) *= factors[i];
+            result.GetElement(i, i) *= factors[i];
         return result;
     }
 
