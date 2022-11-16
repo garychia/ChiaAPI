@@ -211,13 +211,13 @@ template <class T> T Exp(const T &x)
     const auto input = Abs(x);
     T result = 0;
     T numerator = 1;
-    std::size_t denominator = 1;
-    std::size_t i = 1;
+    size_t denominator = 1;
+    size_t i = 1;
     T term = numerator / denominator;
     while (i < 501 && term >= 1E-20)
     {
         result += term;
-        if (denominator >= 1000)
+        if (denominator >= 10000)
         {
             numerator /= denominator;
             denominator = 1;
@@ -247,7 +247,7 @@ template <class T> T NaturalLog(const T &x)
     T numerator = input;
     T denominator = 1;
     T ratio = numerator / denominator;
-    for (std::size_t i = 0; i < 1000; i++)
+    for (size_t i = 0; i < 1000; i++)
     {
         result += ratio * (positiveTerm ? 1 : -1);
         numerator *= input;
@@ -255,7 +255,7 @@ template <class T> T NaturalLog(const T &x)
         ratio = numerator / denominator;
         positiveTerm = !positiveTerm;
     }
-    return result + (Constants::Ln2)*exp;
+    return result + Constants::Ln2 * exp;
 }
 
 template <class T> T Sine(const T &x)
@@ -271,13 +271,13 @@ template <class T> T Sine(const T &x)
     T numerator = input;
     T denominator = 1;
     T result = numerator / denominator;
-    std::size_t i = 3;
+    size_t i = 3;
     while (i < 2006)
     {
         factor = -factor;
         numerator *= squaredInput;
         denominator *= i * (i - 1);
-        if (denominator > 10000)
+        if (denominator >= 10000)
         {
             numerator /= denominator;
             denominator = 1;
@@ -301,13 +301,13 @@ template <class T> T Cosine(const T &x)
     T numerator = 1;
     T denominator = 1;
     T result = numerator / denominator;
-    std::size_t i = 2;
+    size_t i = 2;
     while (i < 2003)
     {
         factor = -factor;
         numerator *= squaredInput;
         denominator *= i * (i - 1);
-        if (denominator > 10000)
+        if (denominator >= 10000)
         {
             numerator /= denominator;
             denominator = 1;
@@ -337,7 +337,7 @@ template <class T> T Cosh(const T &x)
 
 template <class T> T Tanh(const T &x)
 {
-    if (2 * x > 14 || 2 * x < -14)
+    if (x > 7 || x < -7)
         return x > 0 ? 1 : -1;
     const T exponential = Exp(2 * x);
     return (exponential - 1) / (exponential + 1);
@@ -345,7 +345,7 @@ template <class T> T Tanh(const T &x)
 
 namespace
 {
-template <class T> T _PowerLong(const T &x, long n)
+template <class T> T __Power(const T &x, long long n)
 {
     if (x == 0 && n <= 0)
     {
@@ -366,7 +366,7 @@ template <class T> T _PowerLong(const T &x, long n)
         even.Append((p & 1) == 0);
         p >>= 1;
     }
-    auto result = x;
+    T result = x;
     for (auto itr = even.First(); itr != even.Last(); itr++)
     {
         result *= result;
@@ -391,8 +391,8 @@ template <class T, class PowerType> T Power(const T x, PowerType n)
             return T(1) / Power(x, -n);
         return Exp(n * NaturalLog(x));
     }
-    else if (x < 0 && (long)n == n)
-        return _PowerLong<T>(x, (long)n);
+    else if (x < 0 && (long long)n == n)
+        return __Power<T>(x, (long long)n);
     StringStream ss;
     ss << "Power: " << x;
     ss << " to the power of " << n;
