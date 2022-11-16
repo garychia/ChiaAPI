@@ -237,7 +237,7 @@ template <class T> class CUDAVector
      */
     T Sum() const
     {
-        return ChiaAlgs::ChiaCUDA::SumDeviceArray(deviceBuffer.GetDevicePtr(), deviceBuffer.Size());
+        return ChiaAlgs::ChiaCUDA::SumArray(deviceBuffer.GetDevicePtr(), deviceBuffer.Size());
     }
 
     /**
@@ -268,11 +268,11 @@ template <class T> class CUDAVector
         ChiaRuntime::ChiaCUDA::PrintCUDAErrorMessage(cudaMalloc(&squaredArray, sizeof(T) * deviceBuffer.Size()));
         const size_t nThreads = 32;
         const size_t nBlocks = (deviceBuffer.Size() + nThreads - 1) / nThreads;
-        ChiaAlgs::ChiaCUDA::ArrayMap<<<nBlocks, nThreads>>>(
-            squaredArray, deviceBuffer.GetDevicePtr(), [&p](const T &e) { return ChiaMath::Power(e, p); },
+        ChiaAlgs::ChiaCUDA::MapArray<<<nBlocks, nThreads>>>(
+            squaredArray, deviceBuffer.GetDevicePtr(), [=](const T e) __device__ { return ChiaMath::Power(e, p); },
             deviceBuffer.Size());
         ChiaRuntime::ChiaCUDA::PrintCUDAErrorMessage(cudaDeviceSynchronize());
-        T result = ChiaAlgs::ChiaCUDA::SumDeviceArray(squaredArray, deviceBuffer.Size());
+        T result = ChiaAlgs::ChiaCUDA::SumArray(squaredArray, deviceBuffer.Size());
         ChiaRuntime::ChiaCUDA::PrintCUDAErrorMessage(cudaFree(squaredArray));
         return ChiaMath::Power(result, 1 / p);
     }
@@ -283,8 +283,8 @@ template <class T> class CUDAVector
         const size_t nThreads = 32;
         const size_t nBlocks = (thisDimension + nThreads - 1) / nThreads;
         result.hostBufferUpdated = false;
-        ChiaAlgs::ChiaCUDA::ArrayScalerAddition<<<nBlocks, nThreads>>>(
-            result.deviceBuffer.GetDevicePtr(), deviceBuffer.GetDevicePtr(), scaler, Dimension());
+        ChiaAlgs::ChiaCUDA::AddArrayScaler<<<nBlocks, nThreads>>>(result.deviceBuffer.GetDevicePtr(),
+                                                                  deviceBuffer.GetDevicePtr(), scaler, Dimension());
         ChiaRuntime::ChiaCUDA::PrintCUDAErrorMessage(cudaDeviceSynchronize());
         return result;
     }
@@ -309,9 +309,9 @@ template <class T> class CUDAVector
         result.hostBufferUpdated = false;
         const size_t nThreads = 32;
         const size_t nBlocks = (thisDimension + nThreads - 1) / nThreads;
-        ChiaAlgs::ChiaCUDA::ArrayAddition<<<nBlocks, nThreads>>>(result.deviceBuffer.GetDevicePtr(),
-                                                                 deviceBuffer.GetDevicePtr(),
-                                                                 other.deviceBuffer.GetDevicePtr(), otherDimension);
+        ChiaAlgs::ChiaCUDA::AddArrays<<<nBlocks, nThreads>>>(result.deviceBuffer.GetDevicePtr(),
+                                                             deviceBuffer.GetDevicePtr(),
+                                                             other.deviceBuffer.GetDevicePtr(), otherDimension);
         ChiaRuntime::ChiaCUDA::PrintCUDAErrorMessage(cudaDeviceSynchronize());
         return result;
     }
