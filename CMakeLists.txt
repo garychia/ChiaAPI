@@ -21,10 +21,15 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/build/archives)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/build/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/build/bin)
 
+if (WIN32)
+    add_compile_definitions(CHIA_WINDOWS)
+endif()
+
 add_subdirectory(ChiaData)
 add_subdirectory(ChiaRuntime)
 add_subdirectory(ChiaMath)
 add_subdirectory(ChiaAlgs)
 add_subdirectory(ChiaML)
+add_subdirectory(ChiaSystem)
 
 add_subdirectory(Examples)
