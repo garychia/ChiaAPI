@@ -1,14 +1,14 @@
 set(CHIA_SYSTEM_HEADER_FILES
     "include/Version.hpp"
     "include/App/ChiaApp.hpp"
-    "include/App/MainLoop.hpp"
     "include/Window/ChiaWindow.hpp"
+    "include/Window/MainLoop.hpp"
 )
 set(CHIA_SYSTEM_SOURCE_FILES
     "src/Version.cpp"
     "src/App/ChiaApp.cpp"
-    "src/App/MainLoop.cpp"
     "src/Window/ChiaWindow.cpp"
+    "src/Window/MainLoop.cpp"
 )
 
 add_library(ChiaSystem STATIC

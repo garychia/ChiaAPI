@@ -3,6 +3,7 @@
 
 #include "App/ChiaApp.hpp"
 #include "Str.hpp"
+#include "Window/MainLoop.hpp"
 
 namespace ChiaSystem
 {
@@ -26,14 +27,24 @@ class ChiaWindow
   protected:
     void *handle;
     ChiaWindowInfo info;
-    const App::ChiaApp *pApp;
+    MainLoop loop;
 
   public:
-    ChiaWindow(const ChiaWindowInfo &info, const App::ChiaApp &app);
+    ChiaWindow(const ChiaWindowInfo &info);
 
-    virtual bool Create();
+    virtual bool Create(App::ChiaApp &app);
 
-    virtual void Destroy();
+    virtual void Update();
+
+    void *GetHandle();
+
+    bool IsRunning() const;
+
+    virtual void OnResize(size_t newWidth, size_t newHeight);
+
+    virtual void OnClose();
+
+    virtual void OnDestroy();
 };
 } // namespace Window
 } // namespace ChiaSystem

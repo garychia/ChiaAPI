@@ -3,7 +3,7 @@
 
 namespace ChiaSystem
 {
-namespace App
+namespace Window
 {
 class MainLoop
 {
@@ -17,9 +17,8 @@ class MainLoop
 
     virtual bool ShouldContinue() const;
 
-    virtual void Execute() = 0;
+    virtual void Execute();
 };
-
-} // namespace App
+} // namespace Window
 } // namespace ChiaSystem
 #endif // MAIN_LOOP_HPP

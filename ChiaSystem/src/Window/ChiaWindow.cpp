@@ -13,12 +13,14 @@ ChiaWindowInfo::ChiaWindowInfo() : width(500), height(500), x(0), y(0), title(),
 {
 }
 
-ChiaWindow::ChiaWindow(const ChiaWindowInfo &info, const App::ChiaApp &app) : handle(nullptr), info(info), pApp(&app)
+ChiaWindow::ChiaWindow(const ChiaWindowInfo &info) : handle(nullptr), info(info)
 {
 }
 
-bool ChiaWindow::Create()
+bool ChiaWindow::Create(App::ChiaApp &app)
 {
+    if (handle)
+        return false;
 #ifdef CHIA_WINDOWS
     const auto windowWidth = info.fullScreen ? GetSystemMetrics(SM_CXSCREEN) : info.width;
     const auto windowHeight = info.fullScreen ? GetSystemMetrics(SM_CYSCREEN) : info.height;
@@ -36,7 +38,7 @@ bool ChiaWindow::Create()
         ChangeDisplaySettings(&devMode, CDS_FULLSCREEN);
     }
 
-    handle = CreateWindowEx(WS_EX_APPWINDOW, pApp->GetName().CStr(), info.title.CStr(), WS_OVERLAPPEDWINDOW, info.x,
+    handle = CreateWindowEx(WS_EX_APPWINDOW, app.GetName().CStr(), info.title.CStr(), WS_OVERLAPPEDWINDOW, info.x,
                             info.y, windowWidth, windowHeight, NULL, NULL, GetModuleHandle(NULL), NULL);
     if (!handle)
     {
@@ -44,15 +46,51 @@ bool ChiaWindow::Create()
             ChangeDisplaySettings(NULL, 0);
         return false;
     }
+    if (info.shown)
+    {
+        ShowWindow((HWND)handle, SW_SHOW);
+        SetForegroundWindow((HWND)handle);
+        SetFocus((HWND)handle);
+    }
+#endif // CHIA_WINDOWS
+    app.RegisterWindow(*this);
     return true;
+}
+
+void ChiaWindow::Update()
+{
+    loop.Execute();
+}
+
+void *ChiaWindow::GetHandle()
+{
+    return handle;
+}
+
+bool ChiaWindow::IsRunning() const
+{
+    return loop.ShouldContinue();
+}
+
+void ChiaWindow::OnResize(size_t newWidth, size_t newHeight)
+{
+    info.width = newWidth;
+    info.height = newHeight;
+}
+
+void ChiaWindow::OnClose()
+{
+#ifdef CHIA_WINDOWS
+    PostQuitMessage(0);
 #endif // CHIA_WINDOWS
 }
 
-void ChiaWindow::Destroy()
+void ChiaWindow::OnDestroy()
 {
 #ifdef CHIA_WINDOWS
     if (handle)
         DestroyWindow((HWND)handle);
+    handle = nullptr;
 #endif // CHIA_WINDOWS
 }
 } // namespace Window
