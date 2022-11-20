@@ -31,5 +31,6 @@ add_subdirectory(ChiaMath)
 add_subdirectory(ChiaAlgs)
 add_subdirectory(ChiaML)
 add_subdirectory(ChiaSystem)
+add_subdirectory(ChiaTest)
 
 add_subdirectory(Examples)

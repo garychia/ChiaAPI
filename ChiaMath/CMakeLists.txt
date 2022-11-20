@@ -11,7 +11,7 @@ add_library(ChiaMath STATIC
     ${CHIA_MATH_HEADER_FILES}
     ${CHIA_MATH_SOURCE_FILES}
 )
-target_include_directories(ChiaMath PRIVATE
+target_include_directories(ChiaMath PUBLIC
     "include"
     "${CMAKE_SOURCE_DIR}/ChiaData/include"
     "${CMAKE_SOURCE_DIR}/ChiaRuntime/include"
