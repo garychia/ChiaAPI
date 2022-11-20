@@ -1,3 +1,6 @@
+#ifndef BST_HPP
+#define BST_HPP
+
 #include "List.hpp"
 #include "Types/Types.hpp"
 
@@ -340,3 +343,5 @@ template <class Key, class Value> class BST
 };
 
 } // namespace ChiaData
+
+#endif // BST_HPP
