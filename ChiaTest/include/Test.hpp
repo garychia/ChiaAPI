@@ -25,9 +25,18 @@
 
 namespace ChiaTest
 {
+/**
+ * @brief Test represents a test to detect bugs to be performed by a Tester.
+ */
 class Test
 {
   public:
+    /**
+     * @brief Perform the test
+     *
+     * @return true if the test was successful and no bugs were found.
+     * @return false otherwise.
+     */
     virtual bool Run() = 0;
 };
 } // namespace ChiaTest
