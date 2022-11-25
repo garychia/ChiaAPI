@@ -44,10 +44,10 @@ class String : public Str<char16_t>
     {
     }
 
-    template <class T> String(const T &c, size_t length) noexcept
+    template <class T>
+    String(const T &c, size_t length) noexcept : Str<char16_t>(c, c<0XD800 || c> 0XDFFF ? length : length << 1)
     {
         const size_t strLength = c < 0XD800 || c > 0XDFFF ? length : length << 1;
-        Str<char16_t>::Str(c, strLength);
         for (size_t i = 0; i < strLength; i++)
         {
             (*this)[i] = i % 2 == 0 ? ((c & 0XFFC00) >> 10) + 0XD800 : (c & 0X3FF) + 0XDC00;

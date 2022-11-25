@@ -115,11 +115,11 @@ template <class T> class Vector : public Tuple<T>
      */
     virtual T &operator[](const size_t &index)
     {
-        if (index < Size())
+        if (index < Tuple<T>::Size())
             return this->data[index];
         StringStream stream;
         stream << "Vector - Index Out of Bound:\n";
-        stream << "Size: " << Size() << "\n";
+        stream << "Size: " << Tuple<T>::Size() << "\n";
         stream << "Index: " << index << "\n";
         throw ChiaRuntime::IndexOutOfBound(stream.ToString());
     }
@@ -133,11 +133,11 @@ template <class T> class Vector : public Tuple<T>
      **/
     virtual const T &operator[](const size_t &index) const override
     {
-        if (index < Size())
+        if (index < Tuple<T>::Size())
             return this->data[index];
         StringStream stream;
         stream << "Vector - Index Out of Bound:\n";
-        stream << "Size: " << Size() << "\n";
+        stream << "Size: " << Tuple<T>::Size() << "\n";
         stream << "Index: " << index << "\n";
         throw ChiaRuntime::IndexOutOfBound(stream.ToString());
     }
@@ -149,7 +149,7 @@ template <class T> class Vector : public Tuple<T>
      */
     size_t Dimension() const
     {
-        return Size();
+        return Tuple<T>::Size();
     }
 
     /**
@@ -187,7 +187,7 @@ template <class T> class Vector : public Tuple<T>
 #pragma omp parallel for schedule(dynamic) reduction(+ : squaredTotal)
         for (size_t i = 0; i < Dimension(); i++)
             squaredTotal += ChiaMath::template Power<ReturnType, int>((*this)[i], p);
-        return Math::template Power<ReturnType, double>(squaredTotal, (double)1 / p);
+        return ChiaMath::template Power<ReturnType, double>(squaredTotal, (double)1 / p);
     }
 
     /**
@@ -201,7 +201,7 @@ template <class T> class Vector : public Tuple<T>
     template <class U> auto Add(const Vector<U> &other) const
     {
         Vector<decltype((*this)[0] + other[0])> result(*this);
-        if (IsEmpty() || other.IsEmpty())
+        if (Tuple<T>::IsEmpty() || other.IsEmpty())
             return result;
         else if (Dimension() % other.Dimension() != 0)
         {
@@ -270,7 +270,7 @@ template <class T> class Vector : public Tuple<T>
      */
     template <class U> Vector<T> &operator+=(const Vector<U> &other)
     {
-        if (IsEmpty() || other.IsEmpty())
+        if (Tuple<T>::IsEmpty() || other.IsEmpty())
             return *this;
         else if (Dimension() % other.Dimension() != 0)
         {
@@ -315,7 +315,7 @@ template <class T> class Vector : public Tuple<T>
     template <class U> auto Minus(const Vector<U> &other) const
     {
         Vector<decltype((*this)[0] - other[0])> result(*this);
-        if (IsEmpty() || other.IsEmpty())
+        if (Tuple<T>::IsEmpty() || other.IsEmpty())
             return result;
         else if (Dimension() % other.Dimension() != 0)
         {
@@ -384,7 +384,7 @@ template <class T> class Vector : public Tuple<T>
      */
     template <class U> Vector<T> &operator-=(const Vector<U> &other)
     {
-        if (IsEmpty() || other.IsEmpty())
+        if (Tuple<T>::IsEmpty() || other.IsEmpty())
             return *this;
         else if (Dimension() % other.Dimension() != 0)
         {
@@ -446,7 +446,7 @@ template <class T> class Vector : public Tuple<T>
     template <class U> auto Scale(const Vector<U> &other) const
     {
         Vector<decltype((*this)[0] * other[0])> result(*this);
-        if (IsEmpty() || other.IsEmpty())
+        if (Tuple<T>::IsEmpty() || other.IsEmpty())
             return result;
         else if (Dimension() % other.Dimension() != 0)
         {
@@ -488,7 +488,7 @@ template <class T> class Vector : public Tuple<T>
     template <class U> auto operator*(const Vector<U> &other) const
     {
         Vector<decltype((*this)[0] * other[0])> result(*this);
-        if (IsEmpty() || other.IsEmpty())
+        if (Tuple<T>::IsEmpty() || other.IsEmpty())
             return result;
         else if (Dimension() % other.Dimension() != 0)
         {
@@ -533,7 +533,7 @@ template <class T> class Vector : public Tuple<T>
      */
     template <class U> Vector<T> &operator*=(const Vector<U> &other)
     {
-        if (IsEmpty() || other.IsEmpty())
+        if (Tuple<T>::IsEmpty() || other.IsEmpty())
             return *this;
         else if (Dimension() % other.Dimension() != 0)
         {
@@ -588,7 +588,7 @@ template <class T> class Vector : public Tuple<T>
     template <class U> auto Divide(const Vector<U> &other) const
     {
         Vector<decltype((*this)[0] / other[0])> result(*this);
-        if (IsEmpty() || other.IsEmpty())
+        if (Tuple<T>::IsEmpty() || other.IsEmpty())
             return result;
         else if (Dimension() % other.Dimension() != 0)
         {
@@ -607,7 +607,7 @@ template <class T> class Vector : public Tuple<T>
             {
                 StringStream stream;
                 stream << "Vector - Divided by Zero:\n";
-                stream << "Vector::Divide: the value at index " << j << " in the argument is found to be zero.";
+                stream << "Vector::Divide: the value at index " << i << " in the argument is found to be zero.";
                 throw ChiaRuntime::DividedByZero(stream.ToString());
             }
         }
@@ -682,7 +682,7 @@ template <class T> class Vector : public Tuple<T>
      */
     template <class U> Vector<T> &operator/=(const Vector<U> &other)
     {
-        if (IsEmpty() || other.IsEmpty())
+        if (Tuple<T>::IsEmpty() || other.IsEmpty())
             return *this;
         else if (Dimension() % other.Dimension() != 0)
         {
@@ -779,7 +779,7 @@ template <class T> class Vector : public Tuple<T>
     {
         T total = 0;
 #pragma omp parallel for schedule(dynamic) reduction(+ : total)
-        for (size_t i = 0; i < Size(); i++)
+        for (size_t i = 0; i < Container<T>::Size(); i++)
             total += (*this)[i];
         return total;
     }
@@ -795,7 +795,7 @@ template <class T> class Vector : public Tuple<T>
     {
         Vector<decltype(f((*this)[0]))> result(*this);
 #pragma omp parallel for schedule(dynamic)
-        for (size_t i = 0; i < Size(); i++)
+        for (size_t i = 0; i < Tuple<T>::Size(); i++)
             result[i] = f(result[i]);
         return result;
     }

@@ -14,7 +14,7 @@ template <class T> class DynamicArray : public Array<T>
     inline void ResizeArray(size_t newSize) noexcept
     {
         auto oldData = this->data;
-        AllocateData(newSize);
+        Array<T>::AllocateData(newSize);
         for (size_t i = 0; i < nElements && i < newSize; i++)
             this->data[i] = oldData[i];
         if (oldData)
@@ -40,14 +40,14 @@ template <class T> class DynamicArray : public Array<T>
     {
     }
 
-    DynamicArray(const Array &arr) noexcept : Array<T>(arr)
+    DynamicArray(const Array<T> &arr) noexcept : Array<T>(arr)
     {
         nElements = arr.Length();
         if (auto dyArr = dynamic_cast<const DynamicArray<T> *>(&arr))
             nElements = dyArr->nElements;
     }
 
-    DynamicArray(Array &&arr) noexcept
+    DynamicArray(Array<T> &&arr) noexcept
     {
         if (auto dyArr = dynamic_cast<DynamicArray<T> *>(&arr))
         {
@@ -58,7 +58,7 @@ template <class T> class DynamicArray : public Array<T>
         {
             nElements = arr.length;
         }
-        Array<T>::Array(Forward<Array<T>>(arr));
+        Array<T>::Array(Types::Forward<Array<T>>(arr));
     }
 
     DynamicArray(size_t initialSize) noexcept : Array<T>(initialSize), nElements(initialSize)
@@ -108,7 +108,7 @@ template <class T> class DynamicArray : public Array<T>
     {
         Comparator cmp;
         size_t otherNElements = other.length;
-        if (auto dyArr = dynamic_cast<DynamicArray<T> *>(&arr))
+        if (auto dyArr = dynamic_cast<DynamicArray<T> *>(&other))
         {
             otherNElements = dyArr->nElements;
         }

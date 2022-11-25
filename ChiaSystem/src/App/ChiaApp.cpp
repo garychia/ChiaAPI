@@ -65,7 +65,7 @@ void ChiaApp::HandleWindowOnDestroy(void *handle)
     pApp->handleWindowMap[handle]->OnDestroy();
 }
 
-ChiaApp::ChiaApp(const ChiaAppCreateInfo &info) : name(info.appName), version(version), handleWindowMap()
+ChiaApp::ChiaApp(const ChiaAppCreateInfo &info) : name(info.appName), version(1, 0, 0), handleWindowMap()
 {
 }
 

@@ -1,6 +1,8 @@
 #ifndef HASH_TABLE_HPP
 #define HASH_TABLE_HPP
 
+#include <cstddef>
+
 #include "Pair.hpp"
 #include "Types/Types.hpp"
 
@@ -9,31 +11,33 @@ namespace ChiaData
 template <class Key, class Value> class HashTable
 {
   private:
-    template <class Key> class KeyHash
+    class KeyHash
     {
       public:
-        static size_t Generate(const Key &key)
+        static std::size_t Generate(const Key &key)
         {
-            return ((size_t)key & 0xff) * 17 + (((size_t)key >> 8) & 0xff) * 13 + (((size_t)key >> 16) & 0xff) * 3;
+            return ((std::size_t)key & 0xff) * 17 + (((std::size_t)key >> 8) & 0xff) * 13 +
+                   (((std::size_t)key >> 16) & 0xff) * 3;
         }
     };
 
-    template <class Key> class ProbeHash
+    class ProbeHash
     {
       public:
-        static size_t Generate(const Key &key)
+        static std::size_t Generate(const Key &key)
         {
-            return ((size_t)key & 0xff) * 7 + (((size_t)key >> 8) & 0xff) * 11 + (((size_t)key >> 16) & 0xff) * 19;
+            return ((std::size_t)key & 0xff) * 7 + (((std::size_t)key >> 8) & 0xff) * 11 +
+                   (((std::size_t)key >> 16) & 0xff) * 19;
         }
     };
 
-    static const size_t TableSizes[];
+    static const std::size_t TableSizes[];
 
-    size_t size;
+    std::size_t size;
 
-    size_t sizeIndex;
+    std::size_t sizeIndex;
 
-    size_t nElements;
+    std::size_t nElements;
 
     Pair<Key, Value> *pairs;
 
@@ -46,7 +50,7 @@ template <class Key, class Value> class HashTable
         pairs = new Pair<Key, Value>[size] {};
         insertMarks = new bool[size];
         deleteMarks = new bool[size];
-        for (size_t i = 0; i < size; i++)
+        for (std::size_t i = 0; i < size; i++)
             insertMarks[i] = deleteMarks[i] = false;
     }
 
@@ -71,11 +75,11 @@ template <class Key, class Value> class HashTable
 
     void Expand()
     {
-        size_t oldSize = size;
+        std::size_t oldSize = size;
         auto oldPairs = pairs;
         auto oldInsertMarks = insertMarks;
         auto oldDeleteMarks = deleteMarks;
-        if (sizeIndex < sizeof(TableSizes) / sizeof(size_t))
+        if (sizeIndex < sizeof(TableSizes) / sizeof(std::size_t))
         {
             sizeIndex++;
             size = TableSizes[sizeIndex];
@@ -86,7 +90,7 @@ template <class Key, class Value> class HashTable
             size <<= 1;
             AllocateMemory();
         }
-        for (size_t i = 0; i < oldSize; i++)
+        for (std::size_t i = 0; i < oldSize; i++)
         {
             if (!oldInsertMarks[i] || oldDeleteMarks[i])
                 continue;
@@ -101,19 +105,19 @@ template <class Key, class Value> class HashTable
     {
         if (sizeIndex == 0)
             return;
-        size_t oldSize = size;
+        std::size_t oldSize = size;
         auto oldPairs = pairs;
         auto oldInsertMarks = insertMarks;
         auto oldDeleteMarks = deleteMarks;
-        if (sizeIndex < sizeof(TableSizes) / sizeof(size_t))
+        if (sizeIndex < sizeof(TableSizes) / sizeof(std::size_t))
         {
             sizeIndex--;
             size = TableSizes[sizeIndex];
             AllocateMemory();
         }
-        else if ((size >> 1) == TableSizes[sizeof(TableSizes) / sizeof(size_t) - 1])
+        else if ((size >> 1) == TableSizes[sizeof(TableSizes) / sizeof(std::size_t) - 1])
         {
-            sizeIndex = sizeof(TableSizes) / sizeof(size_t) - 1;
+            sizeIndex = sizeof(TableSizes) / sizeof(std::size_t) - 1;
             size = TableSizes[sizeIndex];
             AllocateMemory();
         }
@@ -122,7 +126,7 @@ template <class Key, class Value> class HashTable
             size >>= 1;
             AllocateMemory();
         }
-        for (size_t i = 0; i < oldSize; i++)
+        for (std::size_t i = 0; i < oldSize; i++)
         {
             if (!oldInsertMarks[i] || oldDeleteMarks[i])
                 continue;
@@ -133,17 +137,17 @@ template <class Key, class Value> class HashTable
         delete[] oldDeleteMarks;
     }
 
-    size_t FindPosition(const Key &key, bool search) const
+    std::size_t FindPosition(const Key &key, bool search) const
     {
-        const auto hashValue = KeyHash<Key>::Generate(key);
+        const auto hashValue = KeyHash::Generate(key);
         auto currentIdx = hashValue % size;
         if (insertMarks[currentIdx] && !deleteMarks[currentIdx] && pairs[currentIdx].Key() == key)
             return currentIdx;
         if (!search && (!insertMarks[currentIdx] || deleteMarks[currentIdx]))
             return currentIdx;
 
-        size_t i = 1;
-        const auto stepSize = ProbeHash<Key>::Generate(key) % (size - 1) + 1;
+        std::size_t i = 1;
+        const auto stepSize = ProbeHash::Generate(key) % (size - 1) + 1;
         currentIdx = (hashValue + i * stepSize) % size;
         while (insertMarks[currentIdx])
         {
@@ -162,8 +166,8 @@ template <class Key, class Value> class HashTable
     {
       private:
         HashTable *owner;
-        size_t idx;
-        size_t startIdx;
+        std::size_t idx;
+        std::size_t startIdx;
 
         void FindNext()
         {
@@ -256,7 +260,7 @@ template <class Key, class Value> class HashTable
     HashTable(const HashTable &other) : size(other.size), sizeIndex(other.sizeIndex), nElements(other.nElements)
     {
         AllocateMemory();
-        for (size_t i = 0; i < other.size; i++)
+        for (std::size_t i = 0; i < other.size; i++)
         {
             if (!other.insertMarks[i] || other.deleteMarks[i])
                 continue;
@@ -283,7 +287,7 @@ template <class Key, class Value> class HashTable
         sizeIndex = other.sizeIndex;
         nElements = other.nElements;
         AllocateMemory();
-        for (size_t i = 0; i < other.size; i++)
+        for (std::size_t i = 0; i < other.size; i++)
         {
             if (!other.insertMarks[i] || other.deleteMarks[i])
                 continue;
@@ -366,7 +370,7 @@ template <class Key, class Value> class HashTable
         return nElements == 0;
     }
 
-    size_t Length() const
+    std::size_t Length() const
     {
         return nElements;
     }
@@ -401,7 +405,7 @@ template <class Key, class Value> class HashTable
 };
 
 template <class Key, class Value>
-const size_t HashTable<Key, Value>::TableSizes[] = {13, 37, 79, 97, 199, 401, 857, 1699, 3307};
+const std::size_t HashTable<Key, Value>::TableSizes[] = {13, 37, 79, 97, 199, 401, 857, 1699, 3307};
 } // namespace ChiaData
 
 #endif // HASH_TABLE_HPP

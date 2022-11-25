@@ -242,7 +242,7 @@ template <class T> class Str
             delete[] ptr;
     }
 
-    template <class T> long long Find(const T &c) noexcept
+    template <class CharType> long long Find(const CharType &c) noexcept
     {
         for (size_t i = 0; i < length; i++)
         {
@@ -267,7 +267,7 @@ template <class T> class StrStream
 
     template <class CharType, size_t N> StrStream &operator<<(CharType (&cStr)[N])
     {
-        strs.Append(Str<T>::Str(cStr));
+        strs.Append(Str<T>(cStr));
         return *this;
     }
 

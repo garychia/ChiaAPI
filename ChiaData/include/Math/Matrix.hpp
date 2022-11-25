@@ -193,7 +193,7 @@ template <class T> class Matrix : Container<T>
      */
     template <size_t N>
     Matrix(const std::array<Vector<T>, N> &arr)
-        : Container<T>(arr.size() ? arr.size() * arr[0].Size() : 0, 0), nRows(arr.size()), nColumns(arr.size() ? arr[0].Size())
+        : Container<T>(arr.size() ? arr.size() * arr[0].Size() : 0, 0), nRows(arr.size()), nColumns(arr.size() ? arr[0].Size() : 0)
     {
         for (const Vector<T> &vector : arr)
         {
@@ -375,7 +375,7 @@ template <class T> class Matrix : Container<T>
      */
     virtual T &GetElement(size_t index)
     {
-        if (index < Size())
+        if (index < Container<T>::Size())
             return this->data[index];
         StringStream stream;
         stream << "Matrix - Index Out of Bound:\n";
@@ -397,7 +397,7 @@ template <class T> class Matrix : Container<T>
     virtual T &GetElement(size_t row, size_t column)
     {
         const size_t index = row * nColumns + column;
-        if (index < Size())
+        if (index < Container<T>::Size())
             return this->data[index];
         StringStream stream;
         stream << "Matrix - Index Out of Bound:\n";
@@ -418,7 +418,7 @@ template <class T> class Matrix : Container<T>
      */
     virtual const T &GetElement(size_t index) const
     {
-        if (index < Size())
+        if (index < Container<T>::Size())
             return this->data[index];
         StringStream stream;
         stream << "Matrix - Index Out of Bound:\n";
@@ -440,7 +440,7 @@ template <class T> class Matrix : Container<T>
     virtual const T &GetElement(size_t row, size_t column) const
     {
         const size_t index = row * nColumns + column;
-        if (index < Size())
+        if (index < Container<T>::Size())
             return this->data[index];
         StringStream stream;
         stream << "Matrix - Index Out of Bound:\n";
@@ -473,7 +473,7 @@ template <class T> class Matrix : Container<T>
     template <class U> auto Add(const Matrix<U> &other) const
     {
         Matrix<decltype((*this)[0][0] + other[0][0])> result(*this);
-        if (IsEmpty() || other.IsEmpty())
+        if (Container<T>::IsEmpty() || other.IsEmpty())
             return result;
         const auto thisShape = Shape();
         const auto otherShape = other.Shape();
@@ -522,7 +522,7 @@ template <class T> class Matrix : Container<T>
      */
     template <class U> Matrix<T> &operator+=(const Matrix<U> &other)
     {
-        if (IsEmpty() || other.IsEmpty())
+        if (Container<T>::IsEmpty() || other.IsEmpty())
             return *this;
         const auto thisShape = Shape();
         const auto otherShape = other.Shape();
@@ -560,7 +560,7 @@ template <class T> class Matrix : Container<T>
     template <class U> auto Subtract(const Matrix<U> &other) const
     {
         Matrix<decltype((*this)[0][0] + other[0][0])> result(*this);
-        if (IsEmpty() || other.IsEmpty())
+        if (Container<T>::IsEmpty() || other.IsEmpty())
             return result;
         const auto thisShape = Shape();
         const auto otherShape = other.Shape();
@@ -611,7 +611,7 @@ template <class T> class Matrix : Container<T>
      */
     template <class U> Matrix<T> &operator-=(const Matrix<U> &other)
     {
-        if (IsEmpty() || other.IsEmpty())
+        if (Container<T>::IsEmpty() || other.IsEmpty())
             return *this;
         const auto thisShape = Shape();
         const auto otherShape = other.Shape();
@@ -652,7 +652,7 @@ template <class T> class Matrix : Container<T>
         const auto thisShape = Shape();
         const auto otherShape = other.Shape();
         Matrix<decltype((*this)[0][0] * other[0][0])> result(thisShape[0], otherShape[1]);
-        if (IsEmpty() || other.IsEmpty())
+        if (Container<T>::IsEmpty() || other.IsEmpty())
             return result;
         if (thisShape[1] != otherShape[0])
         {
@@ -721,7 +721,7 @@ template <class T> class Matrix : Container<T>
     template <class U> auto Scale(const Matrix<U> &other) const
     {
         Matrix<decltype((*this)[0][0] * other[0][0])> result(*this);
-        if (IsEmpty() || other.IsEmpty())
+        if (Container<T>::IsEmpty() || other.IsEmpty())
             return result;
 
         const auto thisShape = Shape();
@@ -788,7 +788,7 @@ template <class T> class Matrix : Container<T>
      */
     template <class U> Matrix<T> &operator*=(const Matrix<U> &other)
     {
-        if (IsEmpty() || other.IsEmpty())
+        if (Container<T>::IsEmpty() || other.IsEmpty())
             return *this;
 
         const auto thisShape = Shape();
@@ -856,7 +856,7 @@ template <class T> class Matrix : Container<T>
     template <class U> auto Divide(const Matrix<U> &other) const
     {
         Matrix<decltype((*this)[0][0] / other[0][0])> result(*this);
-        if (IsEmpty() || other.IsEmpty())
+        if (Container<T>::IsEmpty() || other.IsEmpty())
             return result;
 
         const auto thisShape = Shape();
@@ -950,7 +950,7 @@ template <class T> class Matrix : Container<T>
      */
     template <class U> Matrix<T> &operator/=(const Matrix<U> &other)
     {
-        if (IsEmpty() || other.IsEmpty())
+        if (Container<T>::IsEmpty() || other.IsEmpty())
             return *this;
 
         const auto thisShape = Shape();
@@ -1005,7 +1005,7 @@ template <class T> class Matrix : Container<T>
     {
         if (!(nRows == other.nRows && nColumns == other.nColumns))
             return false;
-        for (size_t i = 0; i < Size(); i++)
+        for (size_t i = 0; i < Container<T>::Size(); i++)
         {
             if (GetElement(i) != other.GetElement(i))
                 return false;
@@ -1085,9 +1085,9 @@ template <class T> class Matrix : Container<T>
      */
     void Transpose()
     {
-        if (IsEmpty())
+        if (Container<T>::IsEmpty())
             return;
-        T *newElements = new T[Size()];
+        T *newElements = new T[Container<T>::Size()];
         size_t i, j;
 #pragma omp parallel for private(j) collapse(2) schedule(dynamic)
         for (i = 0; i < nRows; i++)
@@ -1154,7 +1154,7 @@ template <class T> class Matrix : Container<T>
         T result = 0;
         size_t i;
 #pragma omp parallel for schedule(dynamic) reduction(+ : sum)
-        for (i = 0; i < Size(); i++)
+        for (i = 0; i < Container<T>::Size(); i++)
             result += GetElement(i);
         return result;
     }
@@ -1198,7 +1198,7 @@ template <class T> class Matrix : Container<T>
      */
     template <class ReturnType> ReturnType FrobeniusNorm() const
     {
-        return Math::Power<T, double>(Map([](const T &e) { return e * e; }).SumAll(), 0.5);
+        return ChiaMath::Power<T, double>(Map([](const T &e) { return e * e; }).SumAll(), 0.5);
     }
 
     /**
@@ -1292,8 +1292,8 @@ template <class T> class Matrix : Container<T>
      */
     static Matrix<T> Rotation2D(const T &radians)
     {
-        const T sinValue = Math::Sine(radians);
-        const T cosValue = Math::Cosine(radians);
+        const T sinValue = ChiaMath::Sine(radians);
+        const T cosValue = ChiaMath::Cosine(radians);
         return Matrix<T>({{cosValue, -sinValue, 0}, {sinValue, cosValue, 0}, {0, 0, 1}});
     }
 
@@ -1313,14 +1313,14 @@ template <class T> class Matrix : Container<T>
             stream << "Matrix - InvalidArgument:\n";
             stream << "Matrix::Rotation3D: the rotation axis is expected to have a dimension of 3.\n";
             stream << "Dimension of the axis: " << axis.Dimension() << "\n";
-            throw ChiaRuntime::InvalidArgument(stream.str());
+            throw ChiaRuntime::InvalidArgument(stream.ToString());
         }
         const auto normalizedAxis = axis.Normalized();
         const T &x = normalizedAxis[0];
         const T &y = normalizedAxis[1];
         const T &z = normalizedAxis[2];
-        const T sinValue = Math::Sine(radians);
-        const T cosValue = Math::Cosine(radians);
+        const T sinValue = ChiaMath::Sine(radians);
+        const T cosValue = ChiaMath::Cosine(radians);
         const T oneMinusCosValue = 1 - cosValue;
         return Matrix<T>({{cosValue + x * x * oneMinusCosValue, x * y * oneMinusCosValue - z * sinValue,
                            x * z * oneMinusCosValue + y * sinValue, 0},
@@ -1349,16 +1349,16 @@ template <class T> class Matrix : Container<T>
             stream << "Matrix - InvalidArgument:\n";
             stream << "Matrix::Perspective: the field of view is expected to be positive.\n";
             stream << "Field of View (FOV): " << fov << "\n";
-            throw ChiaRuntime::InvalidArgument(stream.str());
+            throw ChiaRuntime::InvalidArgument(stream.ToString());
         }
         if (aspect == 0)
         {
             StringStream stream;
             stream << "Matrix - InvalidArgument:\n";
             stream << "Matrix::Perspective: the aspect ratio is expected to be non-zero.\n";
-            throw ChiaRuntime::InvalidArgument(stream.str());
+            throw ChiaRuntime::InvalidArgument(stream.ToString());
         }
-        const T scale = 1 / Math::Tangent(fov * 0.5);
+        const T scale = 1 / ChiaMath::Tangent(fov * 0.5);
         const T farNearDiff = far - near;
         return Matrix<T>({{scale * aspect, 0, 0, 0},
                           {0, scale, 0, 0},
@@ -1386,7 +1386,7 @@ template <class T> class Matrix : Container<T>
             stream << "Matrix - InvalidArgument:\n";
             stream << "Matrix::Orthographic: 'left' and 'right' are expected to be different.\n";
             stream << "left = right = " << left << "\n";
-            throw ChiaRuntime::InvalidArgument(stream.str());
+            throw ChiaRuntime::InvalidArgument(stream.ToString());
         }
         if (bottom == top)
         {
@@ -1394,7 +1394,7 @@ template <class T> class Matrix : Container<T>
             stream << "Matrix - InvalidArgument:\n";
             stream << "Matrix::Orthographic: 'bottom' and 'top' are expected to be different.\n";
             stream << "bottom = top = " << bottom << "\n";
-            throw ChiaRuntime::InvalidArgument(stream.str());
+            throw ChiaRuntime::InvalidArgument(stream.ToString());
         }
         if (near == far)
         {
@@ -1402,7 +1402,7 @@ template <class T> class Matrix : Container<T>
             stream << "Matrix - InvalidArgument:\n";
             stream << "Matrix::Orthographic: 'near' and 'far' are expected to be different.\n";
             stream << "near = far = " << near << "\n";
-            throw ChiaRuntime::InvalidArgument(stream.str());
+            throw ChiaRuntime::InvalidArgument(stream.ToString());
         }
         const T rightLeftDiff = right - left;
         const T topBottomDiff = top - bottom;

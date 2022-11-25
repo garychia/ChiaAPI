@@ -413,7 +413,7 @@ template <class T> T Sigmoid(const T &x)
 template <class T> ChiaData::Math::Vector<T> Softmax(const ChiaData::Math::Vector<T> &vector)
 {
     const T denomerator = Exp(vector).Sum();
-    const ChiaData::Vector<T> numerator = Exp(vector);
+    const ChiaData::Math::Vector<T> numerator = Exp(vector);
     return numerator / denomerator;
 }
 

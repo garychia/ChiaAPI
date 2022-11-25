@@ -93,7 +93,7 @@ template <class T> class Tuple : public Container<T>
             return this->data[index];
         StringStream stream;
         stream << "Tuple - Index Out of Bound:\n";
-        stream << "Size: " << Size() << "\n";
+        stream << "Size: " << Container<T>::Size() << "\n";
         stream << "Index: " << index << "\n";
         throw ChiaRuntime::IndexOutOfBound(stream.ToString());
     }
@@ -174,10 +174,10 @@ template <class T> class Tuple : public Container<T>
     {
         StringStream stream;
         stream << "(";
-        for (size_t i = 0; i < Size(); i++)
+        for (size_t i = 0; i < Container<T>::Size(); i++)
         {
             stream << (*this)[i];
-            if (i < Size() - 1)
+            if (i < Container<T>::Size() - 1)
                 stream << ", ";
         }
         stream << ")";
@@ -193,10 +193,10 @@ template <class T> class Tuple : public Container<T>
     {
         std::stringstream ss;
         ss << "(";
-        for (size_t i = 0; i < Size(); i++)
+        for (size_t i = 0; i < Container<T>::Size(); i++)
         {
             ss << (*this)[i];
-            if (i < Size() - 1)
+            if (i < Container<T>::Size() - 1)
                 ss << ", ";
         }
         ss << ")";

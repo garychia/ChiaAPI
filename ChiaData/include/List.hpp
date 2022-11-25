@@ -1,10 +1,17 @@
 #ifndef LIST_HPP
 #define LIST_HPP
 
+#include <cstddef>
+
+#include "Types/Types.hpp"
+
 namespace ChiaData
 {
 template <class T> class List
 {
+  public:
+    class Iterator;
+
   private:
     struct Element
     {
@@ -21,7 +28,7 @@ template <class T> class List
 
         template <class ElementType> Element &operator=(ElementType &&e)
         {
-            data = Forward<decltype(e)>(e.data);
+            data = Types::Forward<decltype(e)>(e.data);
             next = e.next;
             prev = e.prev;
             owner = e.owner;
@@ -204,7 +211,7 @@ template <class T> class List
 
     template <class DataType> void Insert(DataType &&e, const Iterator &nextItr)
     {
-        if (nextElement.owner != this)
+        if (nextItr.owner != this)
             return;
         Element *nextElement = nextItr.current;
         Element *prevElement = nextElement->prev;
@@ -295,7 +302,7 @@ template <class T> class List
         return itr;
     }
 
-    size_t Length() const
+    std::size_t Length() const
     {
         return length;
     }
@@ -303,7 +310,7 @@ template <class T> class List
   private:
     Element *head = 0;
     Element *tail = 0;
-    size_t length = 0;
+    std::size_t length = 0;
 };
 } // namespace ChiaData
 
