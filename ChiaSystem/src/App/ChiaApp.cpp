@@ -128,8 +128,13 @@ void ChiaApp::RegisterWindow(Window::ChiaWindow &window)
 {
     if (handleWindowMap.Contains(window.GetHandle()))
         return;
+    handleWindowMapMutex.Lock();
     handleWindowMap[window.GetHandle()] = &window;
+    handleWindowMapMutex.Unlock();
+
+    windowHandleAppMapMutex.Lock();
     windowHandleAppMap[window.GetHandle()] = this;
+    windowHandleAppMapMutex.Unlock();
 }
 } // namespace App
 } // namespace ChiaSystem
