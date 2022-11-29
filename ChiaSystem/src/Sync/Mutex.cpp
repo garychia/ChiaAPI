@@ -9,7 +9,7 @@ namespace ChiaSystem
 {
 namespace Sync
 {
-Mutex::Mutex() : handle(nullptr)
+Mutex::Mutex() : handle(nullptr), locked(false)
 {
 #ifdef CHIA_WINDOWS
 #else
@@ -28,6 +28,8 @@ Mutex::~Mutex()
 
     if (handle)
     {
+        if (locked)
+            Unlock();
 #ifdef CHIA_WINDOWS
 #else
         pthread_mutex_destroy((pthread_mutex_t *)handle);
@@ -46,7 +48,7 @@ bool Mutex::Lock()
 #ifdef CHIA_WINDOWS
 #else
     const auto result = pthread_mutex_lock((pthread_mutex_t *)handle);
-    return result == 0;
+    return locked = result == 0;
 #endif
 }
 
@@ -55,7 +57,7 @@ bool Mutex::TryLock()
 #ifdef CHIA_WINDOWS
 #else
     const auto result = pthread_mutex_trylock((pthread_mutex_t *)handle);
-    return result == 0;
+    return locked = result == 0;
 #endif
 }
 
@@ -64,7 +66,7 @@ bool Mutex::Unlock()
 #ifdef CHIA_WINDOWS
 #else
     const auto result = pthread_mutex_unlock((pthread_mutex_t *)handle);
-    return result == 0;
+    return locked = result != 0;
 #endif
 }
 } // namespace Sync

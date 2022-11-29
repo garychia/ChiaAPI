@@ -10,6 +10,8 @@ class Mutex
   private:
     void *handle;
 
+    bool locked;
+
   public:
     Mutex();
 
