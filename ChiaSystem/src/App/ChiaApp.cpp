@@ -1,5 +1,6 @@
 #include "App/ChiaApp.hpp"
 #include "Window/ChiaWindow.hpp"
+#include <pthread.h>
 
 #ifdef CHIA_WINDOWS
 #define WIN32_LEAN_AND_MEAN
@@ -39,6 +40,8 @@ ChiaAppCreateInfo::ChiaAppCreateInfo(const AppStrType &name, const Version &vers
 {
 }
 
+Sync::Mutex ChiaApp::windowHandleAppMapMutex = Sync::Mutex();
+
 WindowAppMapType ChiaApp::windowHandleAppMap = WindowAppMapType();
 
 void ChiaApp::HandleWindowOnResize(void *handle, size_t newWidth, size_t newHeight)
@@ -51,21 +54,42 @@ void ChiaApp::HandleWindowOnResize(void *handle, size_t newWidth, size_t newHeig
 
 void ChiaApp::HandleWindowOnClose(void *handle)
 {
-    if (!windowHandleAppMap.Contains(handle))
-        return;
-    ChiaApp *pApp = windowHandleAppMap[handle];
-    pApp->handleWindowMap[handle]->OnClose();
+    windowHandleAppMapMutex.Lock();
+    if (windowHandleAppMap.Contains(handle))
+    {
+        ChiaApp *pApp = windowHandleAppMap[handle];
+        windowHandleAppMapMutex.Unlock();
+
+        pApp->handleWindowMapMutex.Lock();
+        pApp->handleWindowMap[handle]->OnClose();
+        pApp->handleWindowMapMutex.Unlock();
+    }
+    else
+    {
+        windowHandleAppMapMutex.Unlock();
+    }
 }
 
 void ChiaApp::HandleWindowOnDestroy(void *handle)
 {
-    if (!windowHandleAppMap.Contains(handle))
-        return;
-    ChiaApp *pApp = windowHandleAppMap[handle];
-    pApp->handleWindowMap[handle]->OnDestroy();
+    windowHandleAppMapMutex.Lock();
+    if (windowHandleAppMap.Contains(handle))
+    {
+        ChiaApp *pApp = windowHandleAppMap[handle];
+        windowHandleAppMapMutex.Unlock();
+
+        pApp->handleWindowMapMutex.Lock();
+        pApp->handleWindowMap[handle]->OnDestroy();
+        pApp->handleWindowMapMutex.Unlock();
+    }
+    else
+    {
+        windowHandleAppMapMutex.Unlock();
+    }
 }
 
-ChiaApp::ChiaApp(const ChiaAppCreateInfo &info) : name(info.appName), version(1, 0, 0), handleWindowMap()
+ChiaApp::ChiaApp(const ChiaAppCreateInfo &info)
+    : name(info.appName), version(1, 0, 0), handleWindowMapMutex(), handleWindowMap()
 {
 }
 

@@ -23,6 +23,8 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/build/bin)
 
 if (WIN32)
     add_compile_definitions(CHIA_WINDOWS)
+elseif (APPLE)
+    add_compile_definitions(CHIA_APPLE)
 endif()
 
 add_subdirectory(ChiaData)

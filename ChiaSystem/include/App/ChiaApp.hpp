@@ -3,6 +3,7 @@
 
 #include "HashTable.hpp"
 #include "Str.hpp"
+#include "Sync/Mutex.hpp"
 #include "Version.hpp"
 #include "Window/MainLoop.hpp"
 
@@ -59,6 +60,8 @@ struct ChiaAppCreateInfo
 class ChiaApp
 {
   protected:
+    static Sync::Mutex windowHandleAppMapMutex;
+
     /**
      * @brief maps a window handle to the ChiaApp object which created it.
      */
@@ -73,6 +76,8 @@ class ChiaApp
      * @brief the version of ChiaApp.
      */
     Version version;
+
+    Sync::Mutex handleWindowMapMutex;
 
     /**
      * @brief maps a window handle to the ChiaWindow which owns it.
