@@ -1,6 +1,5 @@
 #include "App/ChiaApp.hpp"
 #include "Window/ChiaWindow.hpp"
-#include <pthread.h>
 
 #ifdef CHIA_WINDOWS
 #define WIN32_LEAN_AND_MEAN
