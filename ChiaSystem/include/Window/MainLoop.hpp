@@ -1,6 +1,11 @@
 #ifndef MAIN_LOOP_HPP
 #define MAIN_LOOP_HPP
 
+#ifdef CHIA_WINDOWS
+#define WIN32_LEAN_AND_MEAN
+#include <Windows.h>
+#endif // CHIA_WINDOWS
+
 namespace ChiaSystem
 {
 namespace Window
@@ -15,6 +20,13 @@ class MainLoop
      * @brief indicates whether the MainLoop should continue to operate.
      */
     bool shouldContinue;
+
+#ifdef CHIA_WINDOWS
+    /**
+     * @brief message information from the message queue in Windows.
+     */
+    MSG msg;
+#endif
 
   public:
     /**

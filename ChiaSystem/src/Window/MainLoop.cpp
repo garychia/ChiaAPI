@@ -25,7 +25,6 @@ bool MainLoop::ShouldContinue() const
 void MainLoop::Execute()
 {
 #ifdef CHIA_WINDOWS
-    static MSG msg;
     msg = {};
     if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
     {
