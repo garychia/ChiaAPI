@@ -1,7 +1,6 @@
 set(CHIA_SYSTEM_HEADER_FILES
     "include/Version.hpp"
     "include/App/ChiaApp.hpp"
-    "include/DX/DXHelper.hpp"
     "include/Sync/Mutex.hpp"
     "include/Window/ChiaWindow.hpp"
     "include/Window/MainLoop.hpp"
@@ -9,11 +8,15 @@ set(CHIA_SYSTEM_HEADER_FILES
 set(CHIA_SYSTEM_SOURCE_FILES
     "src/Version.cpp"
     "src/App/ChiaApp.cpp"
-    "src/DX/DXHelper.cpp"
     "src/Sync/Mutex.cpp"
     "src/Window/ChiaWindow.cpp"
     "src/Window/MainLoop.cpp"
 )
+
+if(WIN32)
+    list(APPEND CHIA_SYSTEM_HEADER_FILES "include/DX/DXHelper.hpp")
+    list(APPEND CHIA_SYSTEM_SOURCE_FILES "src/DX/DXHelper.cpp")
+endif()
 
 add_library(ChiaSystem STATIC
     ${CHIA_SYSTEM_HEADER_FILES}
