@@ -14,7 +14,7 @@ HRESULT DXHelper::CreateDevice(ComPtr<ID3D11Device> &pDevice, ComPtr<ID3D11Devic
     HRESULT hr;
     UINT deviceFlags = D3D11_CREATE_DEVICE_BGRA_SUPPORT;
 
-#if defined(DEBUG)
+#ifndef NDEBUG
     deviceFlags |= D3D11_CREATE_DEVICE_DEBUG;
 #endif
     hr = D3D11CreateDevice(nullptr, D3D_DRIVER_TYPE_HARDWARE, 0, deviceFlags, DX_SUPPORTED_LEVELS,
