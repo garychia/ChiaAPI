@@ -3,6 +3,12 @@
 
 namespace ChiaData
 {
+/**
+ * @brief A data structure that stores a pair of values, the key and value.
+ * 
+ * @tparam T the type of the first value (key).
+ * @tparam U the type of the second value (value).
+ */
 template <class T, class U> class Pair
 {
   private:
