@@ -6,9 +6,17 @@
 
 namespace ChiaData
 {
+/**
+ * @brief A data structure that is an dynamic array and expands its capacity when necessary.
+ *
+ * @tparam T the type of element.
+ */
 template <class T> class DynamicArray : public Array<T>
 {
   private:
+    /**
+     * @brief the number of elements currently stored.
+     */
     size_t nElements;
 
     inline void ResizeArray(size_t newSize) noexcept
@@ -32,10 +40,18 @@ template <class T> class DynamicArray : public Array<T>
     }
 
   public:
+    /**
+     * @brief Construct a new empty DynamicArray object.
+     */
     DynamicArray() noexcept : Array<T>(), nElements(0)
     {
     }
 
+    /**
+     * @brief Construct a new DynamicArray object with an initializer_list.
+     * 
+     * @param initList an initializer_list with the elements to be stored in the DynamicArray.
+     */
     DynamicArray(const std::initializer_list<T> &initList) noexcept : Array<T>(initList), nElements(initList.size())
     {
     }
