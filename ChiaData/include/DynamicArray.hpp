@@ -56,6 +56,11 @@ template <class T> class DynamicArray : public Array<T>
     {
     }
 
+    /**
+     * @brief Construct a new DynamicArray object
+     * 
+     * @param arr an Array to be copied to the DynamicArray.
+     */
     DynamicArray(const Array<T> &arr) noexcept : Array<T>(arr)
     {
         nElements = arr.Length();
@@ -63,6 +68,11 @@ template <class T> class DynamicArray : public Array<T>
             nElements = dyArr->nElements;
     }
 
+    /**
+     * @brief Construct a new DynamicArray object
+     * 
+     * @param arr an Array to be copied to the DynamicArray.
+     */
     DynamicArray(Array<T> &&arr) noexcept
     {
         if (auto dyArr = dynamic_cast<DynamicArray<T> *>(&arr))
@@ -77,6 +87,11 @@ template <class T> class DynamicArray : public Array<T>
         Array<T>::Array(Types::Forward<Array<T>>(arr));
     }
 
+    /**
+     * @brief Construct a new DynamicArray object of a given size.
+     * 
+     * @param initialSize the size of the DynamicArray.
+     */
     DynamicArray(size_t initialSize) noexcept : Array<T>(initialSize), nElements(initialSize)
     {
     }
