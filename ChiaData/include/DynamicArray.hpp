@@ -96,6 +96,12 @@ template <class T> class DynamicArray : public Array<T>
     {
     }
 
+    /**
+     * @brief Construct a new DynamicArray object populated with the same elements.
+     * 
+     * @param element the element to be copied.
+     * @param nElements the number of copies. 
+     */
     DynamicArray(const T &element, size_t nElements) noexcept : Array<T>(element, nElements), nElements(nElements)
     {
     }
