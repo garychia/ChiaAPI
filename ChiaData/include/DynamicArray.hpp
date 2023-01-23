@@ -49,7 +49,7 @@ template <class T> class DynamicArray : public Array<T>
 
     /**
      * @brief Construct a new DynamicArray object with an initializer_list.
-     * 
+     *
      * @param initList an initializer_list with the elements to be stored in the DynamicArray.
      */
     DynamicArray(const std::initializer_list<T> &initList) noexcept : Array<T>(initList), nElements(initList.size())
@@ -58,7 +58,7 @@ template <class T> class DynamicArray : public Array<T>
 
     /**
      * @brief Construct a new DynamicArray object
-     * 
+     *
      * @param arr an Array to be copied to the DynamicArray.
      */
     DynamicArray(const Array<T> &arr) noexcept : Array<T>(arr)
@@ -70,7 +70,7 @@ template <class T> class DynamicArray : public Array<T>
 
     /**
      * @brief Construct a new DynamicArray object
-     * 
+     *
      * @param arr an Array to be copied to the DynamicArray.
      */
     DynamicArray(Array<T> &&arr) noexcept
@@ -89,7 +89,7 @@ template <class T> class DynamicArray : public Array<T>
 
     /**
      * @brief Construct a new DynamicArray object of a given size.
-     * 
+     *
      * @param initialSize the size of the DynamicArray.
      */
     DynamicArray(size_t initialSize) noexcept : Array<T>(initialSize), nElements(initialSize)
@@ -98,24 +98,42 @@ template <class T> class DynamicArray : public Array<T>
 
     /**
      * @brief Construct a new DynamicArray object populated with the same elements.
-     * 
+     *
      * @param element the element to be copied.
-     * @param nElements the number of copies. 
+     * @param nElements the number of copies.
      */
     DynamicArray(const T &element, size_t nElements) noexcept : Array<T>(element, nElements), nElements(nElements)
     {
     }
 
+    /**
+     * @brief Construct a new DynamicArray object
+     *
+     * @param cArr the array to be copied.
+     * @param nElements the number of elements in the array.
+     */
     DynamicArray(const T *cArr, size_t nElements) noexcept : Array<T>(cArr, nElements), nElements(nElements)
     {
     }
 
+    /**
+     * @brief Copy a std::initializer_list.
+     *
+     * @param l a std::initializer_list to be copied.
+     * @return DynamicArray<T>& the DynamicArray.
+     */
     DynamicArray<T> &operator=(const std::initializer_list<T> &l)
     {
         *this = DynamicArray<T>(l);
         return *this;
     }
 
+    /**
+     * @brief Copy an Array object.
+     *
+     * @param arr the Array object.
+     * @return DynamicArray<T>& the DynamicArray.
+     */
     DynamicArray<T> &operator=(const Array<T> &arr) noexcept
     {
         Array<T>::operator=(arr);
@@ -126,6 +144,12 @@ template <class T> class DynamicArray : public Array<T>
         return *this;
     }
 
+    /**
+     * @brief Move the content of an Array object.
+     *
+     * @param arr the Array object.
+     * @return DynamicArray<T>& the DynamicArray.
+     */
     DynamicArray<T> &operator=(Array<T> &&arr) noexcept
     {
         if (auto dyArr = dynamic_cast<DynamicArray<T> *>(&arr))
@@ -141,6 +165,14 @@ template <class T> class DynamicArray : public Array<T>
         return *this;
     }
 
+    /**
+     * @brief Check if each element in the DynamicArray is equal to the corresponding one in another DynamicArray.
+     *
+     * @tparam Comparator a type that checks if two elements are equal.
+     * @param other the other DynamicArray.
+     * @return true if each element in the DynamicArray is equal to the corresponding one in another DynamicArray.
+     * @return false otherwise.
+     */
     template <class Comparator> bool operator==(const Array<T> &other) const noexcept
     {
         Comparator cmp;
