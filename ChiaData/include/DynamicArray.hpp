@@ -191,12 +191,21 @@ template <class T> class DynamicArray : public Array<T>
         return true;
     }
 
+    /**
+     * @brief Append an element to the DynamicArray.
+     *
+     * @tparam Element the type of the element.
+     * @param e the element to be appended.
+     */
     template <class Element> inline void Append(Element &&e) noexcept
     {
         DynamicallyResize();
         this->data[nElements++] = Types::Forward<decltype(e)>(e);
     }
 
+    /**
+     * @brief Remove the last element out of the DynamicArray.
+     */
     inline void RemoveLast() noexcept
     {
         if (IsEmpty())
@@ -205,6 +214,9 @@ template <class T> class DynamicArray : public Array<T>
         DynamicallyResize();
     }
 
+    /**
+     * @brief Remove all the elements out of the DynamicArray.
+     */
     inline void RemoveAll() noexcept
     {
         nElements = 0;
@@ -213,37 +225,73 @@ template <class T> class DynamicArray : public Array<T>
         DynamicallyResize();
     }
 
+    /**
+     * @brief Resize the DynamicArray.
+     *
+     * @param newSize the new size of the DynamicArray.
+     */
     inline void Resize(size_t newSize) noexcept
     {
         ResizeArray(newSize);
         nElements = newSize;
     }
 
+    /**
+     * @brief Check if the DynamicArray is empty or not.
+     *
+     * @return true if it is empty.
+     * @return false otherwise.
+     */
     inline bool IsEmpty() const noexcept
     {
         return nElements == 0;
     }
 
+    /**
+     * @brief Return the number of elements in the DynamicArray.
+     *
+     * @return size_t the number of elements.
+     */
     inline virtual size_t Length() const noexcept override
     {
         return nElements;
     }
 
+    /**
+     * @brief Get the first element out of the DynamicArray.
+     *
+     * @return T& the first element.
+     */
     inline virtual T &GetFirst() noexcept override
     {
         return this->data[0];
     }
 
+    /**
+     * @brief Get the first element out of the DynamicArray.
+     *
+     * @return const T& the first element.
+     */
     inline virtual const T &GetFirst() const noexcept override
     {
         return this->data[0];
     }
 
+    /**
+     * @brief Get the last element out of the DynamicArray.
+     *
+     * @return T& the last element.
+     */
     inline virtual T &GetLast() noexcept override
     {
         return this->data[nElements - 1];
     }
 
+    /**
+     * @brief Get the last element out of the DynamicArray.
+     *
+     * @return const T& the last element.
+     */
     inline virtual const T &GetLast() const noexcept override
     {
         return this->data[nElements - 1];
