@@ -8,12 +8,27 @@
 
 namespace ChiaData
 {
+/**
+ * @brief A data structure that stores key-value pairs.
+ *
+ * @tparam Key the type of the key.
+ * @tparam Value the type of the value.
+ */
 template <class Key, class Value> class HashTable
 {
   private:
+    /**
+     * @brief A class that generates a hash value for a given key.
+     */
     class KeyHash
     {
       public:
+        /**
+         * @brief Generate a hash value for a key.
+         *
+         * @param key the key.
+         * @return std::size_t the hash value.
+         */
         static std::size_t Generate(const Key &key)
         {
             return ((std::size_t)key & 0xff) * 17 + (((std::size_t)key >> 8) & 0xff) * 13 +
@@ -21,9 +36,18 @@ template <class Key, class Value> class HashTable
         }
     };
 
+    /**
+     * @brief A class that generates a hash value for a given key as the probing step size.
+     */
     class ProbeHash
     {
       public:
+        /**
+         * @brief Generate a hash value for a key as the probing step size.
+         *
+         * @param key the key.
+         * @return std::size_t the hash value.
+         */
         static std::size_t Generate(const Key &key)
         {
             return ((std::size_t)key & 0xff) * 7 + (((std::size_t)key >> 8) & 0xff) * 11 +
@@ -31,14 +55,29 @@ template <class Key, class Value> class HashTable
         }
     };
 
+    /**
+     * @brief the sizes of the hash table.
+     */
     static const std::size_t TableSizes[];
 
+    /**
+     * @brief the maximum number of pairs can be stored.
+     */
     std::size_t size;
 
+    /**
+     * @brief the index of a size in TableSizes being the current size.
+     */
     std::size_t sizeIndex;
 
+    /**
+     * @brief the current number of pairs being stored.
+     */
     std::size_t nElements;
 
+    /**
+     * @brief the array used to store the key-value pairs.
+     */
     Pair<Key, Value> *pairs;
 
     bool *insertMarks;
