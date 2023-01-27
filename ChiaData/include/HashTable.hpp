@@ -80,10 +80,19 @@ template <class Key, class Value> class HashTable
      */
     Pair<Key, Value> *pairs;
 
+    /**
+     * @brief indices whether a location has been inserted or not.
+     */
     bool *insertMarks;
 
+    /**
+     * @brief indices whether a location has been deleted or not.
+     */
     bool *deleteMarks;
 
+    /**
+     * @brief Allocate memory for the buffers.
+     */
     void AllocateMemory()
     {
         pairs = new Pair<Key, Value>[size] {};
@@ -93,6 +102,9 @@ template <class Key, class Value> class HashTable
             insertMarks[i] = deleteMarks[i] = false;
     }
 
+    /**
+     * @brief Release the buffers.
+     */
     void ReleaseMemory()
     {
         if (pairs)
@@ -103,6 +115,9 @@ template <class Key, class Value> class HashTable
             delete[] deleteMarks;
     }
 
+    /**
+     * @brief Resize the hash table dynamically.
+     */
     void DynamicallyResize()
     {
         const float loadFactor = (float)nElements / size;
@@ -112,6 +127,9 @@ template <class Key, class Value> class HashTable
             Shrink();
     }
 
+    /**
+     * @brief Expand the hash table to store more values.
+     */
     void Expand()
     {
         std::size_t oldSize = size;
@@ -140,6 +158,9 @@ template <class Key, class Value> class HashTable
         delete[] oldDeleteMarks;
     }
 
+    /**
+     * @brief Shrink the hash table if it is sparse.
+     */
     void Shrink()
     {
         if (sizeIndex == 0)
@@ -176,6 +197,13 @@ template <class Key, class Value> class HashTable
         delete[] oldDeleteMarks;
     }
 
+    /**
+     * @brief Find a position of the key-value pair.
+     * 
+     * @param key the key of the pair.
+     * @param search true if the key is used to search for a location. Otherwise, it is for the insertion.
+     * @return std::size_t the position of the key-value pair found or to be inserted.
+     */
     std::size_t FindPosition(const Key &key, bool search) const
     {
         const auto hashValue = KeyHash::Generate(key);
