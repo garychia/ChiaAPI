@@ -199,7 +199,7 @@ template <class Key, class Value> class HashTable
 
     /**
      * @brief Find a position of the key-value pair.
-     * 
+     *
      * @param key the key of the pair.
      * @param search true if the key is used to search for a location. Otherwise, it is for the insertion.
      * @return std::size_t the position of the key-value pair found or to be inserted.
@@ -232,10 +232,24 @@ template <class Key, class Value> class HashTable
     class Iterator
     {
       private:
+        /**
+         * @brief the HashTable this iterator refers to.
+         */
         HashTable *owner;
+
+        /**
+         * @brief index of the entry in the HashTable this iterator points to.
+         */
         std::size_t idx;
+
+        /**
+         * @brief index of the first entry in the HashTable.
+         */
         std::size_t startIdx;
 
+        /**
+         * @brief Find the index of the next entry in the HashTable.
+         */
         void FindNext()
         {
             if (!owner)
@@ -246,6 +260,9 @@ template <class Key, class Value> class HashTable
                 idx++;
         }
 
+        /**
+         * @brief Find the index of the previous entry in the HashTable.
+         */
         void FindPrev()
         {
             if (!owner)
@@ -257,6 +274,12 @@ template <class Key, class Value> class HashTable
         }
 
       public:
+        /**
+         * @brief Construct a new HashTable::Iterator object
+         *
+         * @param pTable the HashTable the iterator will refer to.
+         * @param end whether this iterator will point to the end of the HashTable.
+         */
         Iterator(HashTable *pTable = nullptr, bool end = false) : owner(pTable), idx(0), startIdx(0)
         {
             if (!pTable)
@@ -271,48 +294,92 @@ template <class Key, class Value> class HashTable
             startIdx = idx;
         }
 
+        /**
+         * @brief Retrieve the key-value pair this iterator points to.
+         *
+         * @return Pair<Key, Value>& the key-value pair.
+         */
         Pair<Key, Value> &operator*()
         {
             return owner->pairs[idx];
         }
 
+        /**
+         * @brief Retrieve a member or function of the key-value pair this iterator points to.
+         *
+         * @return Pair<Key, Value>* the key-value pair.
+         */
         Pair<Key, Value> *operator->()
         {
             return &owner->pairs[idx];
         }
 
+        /**
+         * @brief Make this iterator point to the next entry in the HashTable.
+         *
+         * @return HashTable<Key, Value>::Iterator& the iterator.
+         */
         HashTable<Key, Value>::Iterator &operator++()
         {
             FindNext();
             return *this;
         }
 
+        /**
+         * @brief Make this iterator point to the next entry in the HashTable.
+         *
+         * @return HashTable<Key, Value>::Iterator the iterator.
+         */
         HashTable<Key, Value>::Iterator operator++(int)
         {
             FindNext();
             return *this;
         }
 
+        /**
+         * @brief Make this iterator point to the previous entry in the HashTable.
+         *
+         * @return HashTable<Key, Value>::Iterator the iterator.
+         */
         HashTable<Key, Value>::Iterator &operator--()
         {
             FindPrev();
             return *this;
         }
 
+        /**
+         * @brief Make this iterator point to the next entry in the HashTable.
+         *
+         * @return HashTable<Key, Value>::Iterator the iterator.
+         */
         HashTable<Key, Value>::Iterator operator--(int)
         {
             FindPrev();
             return *this;
         }
 
+        /**
+         * @brief Check if two iterators point to the same entry in the same HashTable.
+         *
+         * @param other another iterator.
+         * @return true if they point to the same entry in the same HashTable.
+         * @return false otherwise.
+         */
         bool operator==(const HashTable<Key, Value>::Iterator &other) const
         {
-            return owner == other.owner && idx == other.idx;
+            return owner && owner == other.owner && idx == other.idx;
         }
 
+        /**
+         * @brief Check if two iterators point to different entries or different HashTables.
+         *
+         * @param other another iterator.
+         * @return true if they point to different entries or different HashTables.
+         * @return false otherwise.
+         */
         bool operator!=(const HashTable<Key, Value>::Iterator &other) const
         {
-            return owner != other.owner || idx != other.idx;
+            return !operator==(other);
         }
 
         friend class HashTable<Key, Value>;
