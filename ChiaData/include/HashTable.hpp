@@ -385,12 +385,20 @@ template <class Key, class Value> class HashTable
         friend class HashTable<Key, Value>;
     };
 
+    /**
+     * @brief Construct a new HashTable object.
+     */
     HashTable() : sizeIndex(0), nElements(0)
     {
         size = TableSizes[sizeIndex];
         AllocateMemory();
     }
 
+    /**
+     * @brief Construct a new HashTable object by copying an existing HashTable.
+     *
+     * @param other a HashTable to be copied.
+     */
     HashTable(const HashTable &other) : size(other.size), sizeIndex(other.sizeIndex), nElements(other.nElements)
     {
         AllocateMemory();
@@ -402,6 +410,11 @@ template <class Key, class Value> class HashTable
         }
     }
 
+    /**
+     * @brief Construct a new HashTable object.
+     *
+     * @param other a HashTable to be 'moved'.
+     */
     HashTable(HashTable &&other)
         : size(other.size), sizeIndex(other.sizeIndex), nElements(other.nElements), pairs(other.pairs),
           insertMarks(other.insertMarks), deleteMarks(other.deleteMarks)
@@ -414,6 +427,12 @@ template <class Key, class Value> class HashTable
         other.deleteMarks = nullptr;
     }
 
+    /**
+     * @brief Copy a HashTable.
+     *
+     * @param other a HashTable to be copied.
+     * @return HashTable& this HashTable.
+     */
     HashTable &operator=(const HashTable &other)
     {
         ReleaseMemory();
@@ -430,6 +449,12 @@ template <class Key, class Value> class HashTable
         return *this;
     }
 
+    /**
+     * @brief Move a HashTable.
+     *
+     * @param other a HashTable to be 'moved'.
+     * @return HashTable& this HashTable.
+     */
     HashTable &operator=(HashTable &&other) noexcept
     {
         size = other.size;
@@ -448,11 +473,22 @@ template <class Key, class Value> class HashTable
         return *this;
     }
 
+    /**
+     * @brief Destroy the HashTable object.
+     */
     ~HashTable()
     {
         ReleaseMemory();
     }
 
+    /**
+     * @brief Insert a key-value pair into the HashTable.
+     *
+     * @tparam KeyType the type of key.
+     * @tparam ValueType the type of value.
+     * @param key the key.
+     * @param value the value.
+     */
     template <class KeyType, class ValueType> void Insert(KeyType &&key, ValueType &&value)
     {
         const auto idx = FindPosition(key, false);
@@ -464,6 +500,11 @@ template <class Key, class Value> class HashTable
         DynamicallyResize();
     }
 
+    /**
+     * @brief Remove a key-value pair.
+     *
+     * @param key the key of the key-value pair to be removed.
+     */
     void Remove(const Key &key)
     {
         if (IsEmpty())
@@ -476,17 +517,34 @@ template <class Key, class Value> class HashTable
         DynamicallyResize();
     }
 
+    /**
+     * @brief Remove all the key-value pairs in the HashTable.
+     */
     void Clear()
     {
         *this = HashTable();
     }
 
+    /**
+     * @brief Check if a key-value pair is present in the HashTable.
+     *
+     * @param key the key of the key-value pair to find.
+     * @return true if the key-value pair is found.
+     * @return false otherwise.
+     */
     bool Contains(const Key &key) const
     {
         const auto idx = FindPosition(key, true);
         return !(!insertMarks[idx] || deleteMarks[idx] || pairs[idx].Key() != key);
     }
 
+    /**
+     * @brief Find a key-value pair.
+     *
+     * @param key the key of the key-value pair.
+     * @return HashTable<Key, Value>::Iterator the iterator that points to the key-value pair if it is found. Otherwise,
+     * HashTable::Last() is returned.
+     */
     HashTable<Key, Value>::Iterator Find(const Key &key) const
     {
         HashTable<Key, Value>::Iterator itr;
@@ -499,26 +557,53 @@ template <class Key, class Value> class HashTable
         return itr;
     }
 
+    /**
+     * @brief Check if the HashTable is empty.
+     *
+     * @return true if there is no key-value pair in the HashTable.
+     * @return false otherwise.
+     */
     bool IsEmpty() const
     {
         return nElements == 0;
     }
 
+    /**
+     * @brief Retrieve the number of key-value pairs in the HashTable.
+     *
+     * @return std::size_t the number of key-value pairs in the HashTable.
+     */
     std::size_t Length() const
     {
         return nElements;
     }
 
+    /**
+     * @brief Get the iterator that points to the first key-value pair.
+     *
+     * @return HashTable<Key, Value>::Iterator the iterator that points to the first key-value pair.
+     */
     HashTable<Key, Value>::Iterator First() const
     {
         return HashTable<Key, Value>::Iterator((HashTable<Key, Value> *)this, false);
     }
 
+    /**
+     * @brief Get the iterator that points to the end of the HashTable.
+     *
+     * @return HashTable<Key, Value>::Iterator the iterator that points to the end of the HashTable.
+     */
     HashTable<Key, Value>::Iterator Last() const
     {
         return HashTable<Key, Value>::Iterator((HashTable<Key, Value> *)this, true);
     }
 
+    /**
+     * @brief Retrieve the value of a key-value pair.
+     * 
+     * @param key the key of the key-value pair.
+     * @return Value& the value of the key-value pair.
+     */
     Value &operator[](const Key &key)
     {
         Iterator itr = Find(key);
@@ -530,6 +615,12 @@ template <class Key, class Value> class HashTable
         return itr->Value();
     }
 
+    /**
+     * @brief Retrieve the value of a key-value pair.
+     * 
+     * @param key the key of the key-value pair.
+     * @return const Value& the value of the key-value pair.
+     */
     const Value &operator[](const Key &key) const
     {
         return Find(key)->Value();
