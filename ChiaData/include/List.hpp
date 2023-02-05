@@ -85,7 +85,7 @@ template <class T> class List
 
         /**
          * @brief Retrieve the data.
-         * 
+         *
          * @return const T& the data.
          */
         const T &operator*() const
@@ -95,7 +95,7 @@ template <class T> class List
 
         /**
          * @brief Access the data.
-         * 
+         *
          * @return T* the data.
          */
         T *operator->()
@@ -105,7 +105,7 @@ template <class T> class List
 
         /**
          * @brief Access the data.
-         * 
+         *
          * @return const T* the data.
          */
         const T *operator->() const
@@ -120,20 +120,44 @@ template <class T> class List
   public:
     using ValueType = T;
 
+    /**
+     * @brief A class that accesses an element of a List.
+     */
     class Iterator
     {
       private:
+        /**
+         * @brief the List to be accessed.
+         */
         List<T> *owner;
+
+        /**
+         * @brief the previous Element.
+         */
         Element *prev;
+
+        /**
+         * @brief the Element this Iterator refers to.
+         */
         Element *current;
 
       public:
+        /**
+         * @brief Construct a new List::Iterator object
+         *
+         * @param pList the List to be accessed.
+         */
         Iterator(List<T> *pList = nullptr) : owner(pList), prev(nullptr), current(nullptr)
         {
             if (pList)
                 current = pList->head;
         }
 
+        /**
+         * @brief Construct a new Iterator object
+         *
+         * @param pElement the element to be accessed by this Iterator.
+         */
         Iterator(Element *pElement) : owner(nullptr), prev(nullptr), current(nullptr)
         {
             if (pElement)
@@ -144,20 +168,40 @@ template <class T> class List
             }
         }
 
+        /**
+         * @brief Construct a new Iterator object
+         *
+         * @param other another Iterator to be copied.
+         */
         Iterator(const Iterator &other) : owner(other.owner), current(other.current)
         {
         }
 
+        /**
+         * @brief Retrieve the content of the element this Iterator refers to.
+         *
+         * @return T& the content of the element.
+         */
         T &operator*()
         {
             return current->data;
         }
 
+        /**
+         * @brief Access the content of the element this Iterator refers to.
+         *
+         * @return T* the content of the element.
+         */
         T *operator->()
         {
             return &current->data;
         }
 
+        /**
+         * @brief Proceed to the next element.
+         *
+         * @return Iterator& this Iterator.
+         */
         Iterator &operator++()
         {
             if (current)
@@ -168,6 +212,11 @@ template <class T> class List
             return *this;
         }
 
+        /**
+         * @brief Proceed to the next element.
+         *
+         * @return Iterator this Iterator.
+         */
         Iterator operator++(int)
         {
             if (current)
@@ -178,6 +227,11 @@ template <class T> class List
             return *this;
         }
 
+        /**
+         * @brief Return to the previous element.
+         *
+         * @return Iterator& this Iterator.
+         */
         Iterator &operator--()
         {
             if (prev)
@@ -188,6 +242,11 @@ template <class T> class List
             return *this;
         }
 
+        /**
+         * @brief Return to the previous element.
+         *
+         * @return Iterator this Iterator.
+         */
         Iterator operator--(int)
         {
             if (prev)
@@ -198,14 +257,28 @@ template <class T> class List
             return *this;
         }
 
+        /**
+         * @brief Check if two Iterators refer to the same element.
+         * 
+         * @param other another Iterator.
+         * @return true if the Iterators refer to the same element.
+         * @return false otherwise.
+         */
         bool operator==(const Iterator &other) const
         {
             return owner == other.owner && current == other.current;
         }
 
+        /**
+         * @brief Check if two Iterators refer to different elements.
+         * 
+         * @param other another Iterator.
+         * @return true if the Iterators refer to different elements.
+         * @return false otherwise.
+         */
         bool operator!=(const Iterator &other) const
         {
-            return owner != other.owner || current != other.current;
+            return !operator==(other);
         }
 
         friend class List<T>;
